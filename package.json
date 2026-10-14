@@ -1,6 +1,6 @@
 {
   "name": "folio-datalaw",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "private": true,
   "description": "Folio - universal document viewer for Android (Capacitor). PDF first.",
   "type": "module",

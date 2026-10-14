@@ -20,4 +20,12 @@ export const en = {
   'viewer.goto': 'Go to page', 'viewer.error': 'Could not open the document',
   'viewer.unsupported': 'This format is not supported yet',
   'viewer.loading': 'Loading…', 'viewer.password': 'This document is password protected. Enter the password',
+  'viewer.thumbs': 'Page thumbnails',
+  'viewer.edit': 'Edit',
+  'viewer.pin': 'Pin toolbar',
+  'edit.pen': 'Pen',
+  'edit.eraser': 'Eraser',
+  'edit.highlighter': 'Highlighter',
+  'edit.textSelect': 'Text select',
+  'edit.underline': 'Underline',
 };

@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="css/library.css">
 <link rel="stylesheet" href="css/settings.css">
 <link rel="stylesheet" href="css/viewer.css">
+<link rel="stylesheet" href="css/viewer-thumbs.css">
+<link rel="stylesheet" href="css/viewer-edit.css">
 <link rel="stylesheet" href="css/toast.css">
 <script type="module" src="js/main.js"></script>
 </head>
@@ -57,14 +59,28 @@
 <section id="viewer" hidden>
     <header class="bar">
       <button class="icon-btn" id="viewer-back" data-i18n-aria="viewer.back"><svg><use href="img/icons.svg#back"/></svg></button>
+      <button class="icon-btn" id="thumbs-btn" data-i18n-aria="viewer.thumbs"><svg><use href="img/icons.svg#thumbnails"/></svg></button>
       <h1 id="viewer-title"></h1>
+      <button class="icon-btn" id="edit-btn" data-i18n-aria="viewer.edit"><svg><use href="img/icons.svg#edit"/></svg></button>
       <button id="viewer-page"></button>
       <button class="icon-btn" id="mode-btn" data-i18n-aria="viewer.mode"></button>
       <button class="icon-btn" id="zoom-out" data-i18n-aria="viewer.zoomOut"><svg><use href="img/icons.svg#zoom-out"/></svg></button>
       <button class="icon-btn" id="zoom-in" data-i18n-aria="viewer.zoomIn"><svg><use href="img/icons.svg#zoom-in"/></svg></button>
       <button class="icon-btn" id="night-btn" data-i18n-aria="set.night"><svg><use href="img/icons.svg#moon"/></svg></button>
     </header>
-    <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
+    <div id="edit-bar" class="edit-bar" hidden>
+      <button class="icon-btn edit-tool" data-tool="pen" data-i18n-aria="edit.pen"><svg><use href="img/icons.svg#pen"/></svg></button>
+      <button class="icon-btn edit-tool" data-tool="eraser" data-i18n-aria="edit.eraser"><svg><use href="img/icons.svg#eraser"/></svg></button>
+      <button class="icon-btn edit-tool" data-tool="highlighter" data-i18n-aria="edit.highlighter"><svg><use href="img/icons.svg#highlighter"/></svg></button>
+      <button class="icon-btn edit-tool" data-tool="text-select" data-i18n-aria="edit.textSelect"><svg><use href="img/icons.svg#text-select"/></svg></button>
+      <button class="icon-btn edit-tool" data-tool="underline" data-i18n-aria="edit.underline"><svg><use href="img/icons.svg#underline"/></svg></button>
+      <div class="edit-sep"></div>
+      <button class="icon-btn edit-tool" id="edit-pin" data-tool="pin" data-i18n-aria="viewer.pin"><svg><use href="img/icons.svg#pin"/></svg></button>
+    </div>
+    <div id="viewer-body">
+      <aside id="viewer-thumbs" class="viewer-thumbs" hidden><div id="thumbs-list"></div></aside>
+      <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
+    </div>
   </section>
   <div id="toast"></div>
 </div>

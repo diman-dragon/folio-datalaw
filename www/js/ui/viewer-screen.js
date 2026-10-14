@@ -3,6 +3,8 @@ import { find } from '../formats/registry.js';
 import { updateDoc } from '../data/library.js';
 import { pushBack } from './back.js';
 import { setHandle, showPage } from './viewer-toolbar.js';
+import { initThumbs, updateThumbsActive, destroyThumbs } from './viewer-thumbs.js';
+import { closeEditBar } from './viewer-edit.js';
 import { t } from '../core/i18n.js';
 import { getReadMode } from '../core/readmode.js';
 const root = document.getElementById('viewer');
@@ -17,6 +19,8 @@ export function closeViewer() {
   try { handle?.destroy(); } catch (err) { console.error(err); }
   handle = null;
   setHandle(null);
+  destroyThumbs();
+  closeEditBar(true);
   popBack?.();
   popBack = null;
   root.hidden = true;
@@ -32,11 +36,12 @@ export async function openViewer(meta, blob) {
   popBack = pushBack(closeViewer);
   try {
     const mod = find(meta.name, blob.type);
-    const onPage = (n, total) => { showPage(n, total); saveLater(meta.id, n); };
+    const onPage = (n, total) => { showPage(n, total); saveLater(meta.id, n); updateThumbsActive(n); };
     const h = await mod.mount({ container: pages, scroller, blob, startPage: meta.lastPage ?? 1, mode: getReadMode(), onPage });
     if (mine !== session) { h.destroy(); return; }
     handle = h;
     setHandle(h);
+    initThumbs(h.doc, h, meta.lastPage ?? 1);
     setStatus(null);
   } catch (err) {
     console.error(err);

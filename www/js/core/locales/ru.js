@@ -20,4 +20,12 @@ export const ru = {
   'viewer.goto': 'Перейти на страницу', 'viewer.error': 'Не удалось открыть документ',
   'viewer.unsupported': 'Формат пока не поддерживается',
   'viewer.loading': 'Загрузка…', 'viewer.password': 'Документ защищён паролем. Введите пароль',
+  'viewer.thumbs': 'Миниатюры страниц',
+  'viewer.edit': 'Редактирование',
+  'viewer.pin': 'Зафиксировать панель',
+  'edit.pen': 'Перо',
+  'edit.eraser': 'Ластик',
+  'edit.highlighter': 'Выделение маркером',
+  'edit.textSelect': 'Выделение текста',
+  'edit.underline': 'Подчеркивание текста',
 };

@@ -3,6 +3,7 @@
 #viewer .bar{gap:2px;padding-left:8px}
 #viewer-title{font-size:15px;padding-left:6px}
 #viewer-page{min-width:56px;padding:0 6px;font-size:14px;color:var(--on-chrome);text-align:center}
+#viewer-body{position:relative;flex:1;min-height:0;display:flex;overflow:hidden}
 #viewer-scroll{flex:1;min-height:0;overflow:auto;touch-action:pan-x pan-y;overscroll-behavior:contain;padding-bottom:var(--sab)}
 #viewer-pages{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;width:max-content;min-width:100%}
 #viewer-scroll.paged{scroll-snap-type:x mandatory}

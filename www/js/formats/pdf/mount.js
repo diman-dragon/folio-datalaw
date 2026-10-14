@@ -18,6 +18,7 @@ export async function mountPdf({ container, scroller, blob, startPage = 1, mode 
   const ro = new ResizeObserver(() => refit(zoom.get()));
   ro.observe(scroller);
   return {
+    doc,
     zoomBy: zoom.by,
     goTo: list.goTo,
     setMode(m) {
