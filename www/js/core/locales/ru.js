@@ -28,4 +28,6 @@ export const ru = {
   'edit.highlighter': 'Выделение маркером',
   'edit.textSelect': 'Выделение текста',
   'edit.underline': 'Подчеркивание текста',
+  'viewer.copy': 'Копировать',
+  'viewer.copied': 'Скопировано',
 };

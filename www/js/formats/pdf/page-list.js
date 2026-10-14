@@ -1,5 +1,6 @@
 // Page placeholders for a pdf.js document (ribbon or one-page-per-screen); pages render lazily near the viewport.
 import { renderPage } from './render-page.js';
+import { renderTextLayer } from './render-text.js';
 const MARGIN = 16;
 export async function createPageList({ doc, container, scroller, mode = 'scroll' }) {
   const first = await doc.getPage(1);
@@ -36,8 +37,12 @@ export async function createPageList({ doc, container, scroller, mode = 'scroll'
       const canvas = document.createElement('canvas');
       e.task = renderPage(e.page, canvas, w);
       await e.task.promise;
+      const textDiv = document.createElement('div');
+      textDiv.className = 'textLayer';
+      const viewport = e.page.getViewport({ scale: w / vp.width });
+      await renderTextLayer(e.page, textDiv, viewport);
       const layer = e.el.querySelector('.annotate-layer');
-      e.el.replaceChildren(canvas);
+      e.el.replaceChildren(canvas, textDiv);
       if (layer) e.el.append(layer);
       e.drawnAt = w;
     } catch { /* cancelled or failed page: ignore */ }

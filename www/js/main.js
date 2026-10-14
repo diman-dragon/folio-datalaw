@@ -8,6 +8,7 @@ import './ui/home-screen.js';
 import './ui/viewer-night.js';
 import './ui/viewer-thumbs.js';
 import './ui/viewer-edit.js';
+import './ui/text-select.js';
 import { toast } from './ui/toast.js';
 import { openFile } from './app/open-file.js';
 import { watchIntents } from './io/launch-intent.js';

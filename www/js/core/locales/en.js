@@ -28,4 +28,6 @@ export const en = {
   'edit.highlighter': 'Highlighter',
   'edit.textSelect': 'Text select',
   'edit.underline': 'Underline',
+  'viewer.copy': 'Copy',
+  'viewer.copied': 'Copied',
 };

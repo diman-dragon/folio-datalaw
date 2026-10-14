@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/viewer.css">
 <link rel="stylesheet" href="css/viewer-thumbs.css">
 <link rel="stylesheet" href="css/viewer-edit.css">
+<link rel="stylesheet" href="css/text-layer.css">
 <link rel="stylesheet" href="css/toast.css">
 <script type="module" src="js/main.js"></script>
 </head>
@@ -75,11 +76,22 @@
       <button class="icon-btn edit-tool" data-tool="text-select" data-i18n-aria="edit.textSelect"><svg><use href="img/icons.svg#text-select"/></svg></button>
       <button class="icon-btn edit-tool" data-tool="underline" data-i18n-aria="edit.underline"><svg><use href="img/icons.svg#underline"/></svg></button>
       <div class="edit-sep"></div>
+      <div class="edit-colors">
+        <button class="color-dot active" data-color="#2563eb" style="--c:#2563eb" title="Синий"></button>
+        <button class="color-dot" data-color="#ef4444" style="--c:#ef4444" title="Красный"></button>
+        <button class="color-dot" data-color="#facc15" style="--c:#facc15" title="Желтый"></button>
+        <button class="color-dot" data-color="#10b981" style="--c:#10b981" title="Зеленый"></button>
+        <button class="color-dot" data-color="#1e293b" style="--c:#1e293b" title="Темный"></button>
+      </div>
+      <div class="edit-sep"></div>
       <button class="icon-btn edit-tool" id="edit-pin" data-tool="pin" data-i18n-aria="viewer.pin"><svg><use href="img/icons.svg#pin"/></svg></button>
     </div>
     <div id="viewer-body">
       <aside id="viewer-thumbs" class="viewer-thumbs" hidden><div id="thumbs-list"></div></aside>
       <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
+    </div>
+    <div id="text-menu" class="text-bubble-menu" hidden>
+      <button id="text-copy-btn"><svg><use href="img/icons.svg#copy"/></svg><span data-i18n="viewer.copy"></span></button>
     </div>
   </section>
   <div id="toast"></div>

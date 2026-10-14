@@ -1,9 +1,10 @@
 // Edit toolbar controller: tools selection, outside click and pin toggle.
-import { setDrawTool } from './viewer-draw.js';
+import { setDrawTool, setDrawColor } from './viewer-draw.js';
 const editBar = document.getElementById('edit-bar');
 const editBtn = document.getElementById('edit-btn');
 const pinBtn = document.getElementById('edit-pin');
 const toolBtns = editBar.querySelectorAll('.edit-tool[data-tool]:not(#edit-pin)');
+const colorDots = editBar.querySelectorAll('.color-dot');
 let isPinned = false;
 let currentTool = null;
 export function openEditBar() {
@@ -44,6 +45,13 @@ toolBtns.forEach((btn) => {
       currentTool = tool;
       setDrawTool(tool);
     }
+  });
+});
+colorDots.forEach((dot) => {
+  dot.addEventListener('click', () => {
+    colorDots.forEach((d) => d.classList.remove('active'));
+    dot.classList.add('active');
+    setDrawColor(dot.dataset.color);
   });
 });
 document.addEventListener('pointerdown', (e) => {

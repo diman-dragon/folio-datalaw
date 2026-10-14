@@ -63,4 +63,5 @@
   <ellipse cx="12" cy="6" rx="3.5" ry="2" fill="#F87171"/>
   <path d="M8 7v4l-2 2v1h12v-1l-2-2V7" fill="#DC2626" stroke="#991B1B" stroke-width="1.2"/>
 </symbol>
+<symbol id="copy" viewBox="0 0 24 24"><path d="M8 4v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7.242a2 2 0 0 0-.602-1.43L16.08 2.57A2 2 0 0 0 14.65 2H10a2 2 0 0 0-2 2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 18v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>

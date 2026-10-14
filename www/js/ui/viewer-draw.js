@@ -1,25 +1,30 @@
 // Drawing and annotation gestures across document pages.
-let activeTool = null, drawing = false, curCtx = null, curRect = null, dpr = 1;
+let activeTool = null, activeColor = '#2563eb', drawing = false, curCtx = null, curRect = null, dpr = 1;
 const pagesContainer = document.getElementById('viewer-pages');
 function getCanvas(pageEl) {
   let c = pageEl.querySelector('.annotate-layer');
   if (!c) {
     c = document.createElement('canvas');
     c.className = 'annotate-layer';
-    const w = pageEl.clientWidth || 300, h = pageEl.clientHeight || 400;
-    c.width = Math.round(w * (window.devicePixelRatio || 1));
-    c.height = Math.round(h * (window.devicePixelRatio || 1));
+    const r = pageEl.getBoundingClientRect();
+    c.width = Math.round((r.width || pageEl.clientWidth || 300) * (window.devicePixelRatio || 1));
+    c.height = Math.round((r.height || pageEl.clientHeight || 400) * (window.devicePixelRatio || 1));
     pageEl.append(c);
   }
   return c;
 }
 function setupCanvasCtx(ctx, tool) {
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.globalCompositeOperation = 'source-over';
-  if (tool === 'pen') { ctx.strokeStyle = '#1d4ed8'; ctx.lineWidth = 3 * dpr; }
-  else if (tool === 'highlighter') { ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)'; ctx.lineWidth = 20 * dpr; ctx.lineCap = 'square'; }
-  else if (tool === 'underline') { ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3 * dpr; }
-  else if (tool === 'eraser') { ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = 26 * dpr; }
+  ctx.globalCompositeOperation = 'multiply';
+  if (tool === 'pen') {
+    ctx.strokeStyle = activeColor; ctx.globalAlpha = 0.72; ctx.lineWidth = 3 * dpr;
+  } else if (tool === 'highlighter') {
+    ctx.strokeStyle = activeColor; ctx.globalAlpha = 0.38; ctx.lineWidth = 22 * dpr; ctx.lineCap = 'square';
+  } else if (tool === 'underline') {
+    ctx.strokeStyle = activeColor; ctx.globalAlpha = 0.8; ctx.lineWidth = 3.5 * dpr;
+  } else if (tool === 'eraser') {
+    ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1.0; ctx.lineWidth = 28 * dpr;
+  }
 }
 function onPointerDown(e) {
   if (!activeTool || activeTool === 'text-select') return;
@@ -53,9 +58,13 @@ function onPointerUp(e) {
 }
 export function setDrawTool(tool) {
   activeTool = tool;
-  const on = Boolean(tool && tool !== 'text-select');
-  document.getElementById('viewer').classList.toggle('draw-active', on);
+  const on = Boolean(tool && tool !== 'text-select' && tool !== 'underline');
+  const root = document.getElementById('viewer');
+  root.classList.toggle('draw-active', on);
+  root.classList.toggle('tool-text-select', tool === 'text-select');
+  root.classList.toggle('tool-underline', tool === 'underline');
 }
+export function setDrawColor(color) { activeColor = color; }
 export function getDrawTool() { return activeTool; }
 pagesContainer.addEventListener('pointerdown', onPointerDown, { passive: false });
 pagesContainer.addEventListener('pointermove', onPointerMove, { passive: false });

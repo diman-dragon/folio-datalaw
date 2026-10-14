@@ -15,7 +15,13 @@ export async function mountPdf({ container, scroller, blob, startPage = 1, mode 
   const offTap = attachDoubleTap({ scroller, zoom });
   list.goTo(startPage);
   const tracker = trackPages({ scroller, els: list.els, onPage: (n) => { cur = n; onPage(n, doc.numPages); } });
-  const ro = new ResizeObserver(() => refit(zoom.get()));
+  let lastW = scroller.clientWidth;
+  const ro = new ResizeObserver(() => {
+    if (Math.abs(scroller.clientWidth - lastW) > 2) {
+      lastW = scroller.clientWidth;
+      refit(zoom.get());
+    }
+  });
   ro.observe(scroller);
   return {
     doc,

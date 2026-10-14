@@ -1,5 +1,4 @@
 // Sidebar thumbnails controller with transparent background overlay.
-import { renderPage } from '../formats/pdf/render-page.js';
 const thumbsPanel = document.getElementById('viewer-thumbs');
 const thumbsList = document.getElementById('thumbs-list');
 const thumbsBtn = document.getElementById('thumbs-btn');
@@ -8,13 +7,17 @@ const items = [];
 function renderThumb(item) {
   if (!item || item.drawn || !docRef) return;
   item.drawn = true;
-  docRef.getPage(item.num).then((page) => {
+  docRef.getPage(item.num).then(async (page) => {
+    const vp0 = page.getViewport({ scale: 1 });
+    const targetW = 80;
+    const vp = page.getViewport({ scale: targetW / vp0.width });
     const canvas = document.createElement('canvas');
-    const task = renderPage(page, canvas, 84);
-    return task.promise.then(() => {
-      item.box.replaceChildren(canvas);
-    });
-  }).catch(() => { item.drawn = false; });
+    canvas.width = Math.floor(vp.width);
+    canvas.height = Math.floor(vp.height);
+    canvas.className = 'thumb-canvas';
+    await page.render({ canvas, viewport: vp }).promise;
+    item.box.replaceChildren(canvas);
+  }).catch((err) => { console.error('Thumb err:', err); item.drawn = false; });
 }
 function renderVisible() {
   const start = Math.max(0, curPage - 4);
@@ -45,16 +48,19 @@ export function initThumbs(doc, handle, start = 1) {
   docRef = doc; handleRef = handle; curPage = start;
   io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
-      if (e.isIntersecting && !thumbsPanel.hidden) renderThumb(items[e.target.dataset.idx]);
+      if (e.isIntersecting) renderThumb(items[e.target.dataset.idx]);
     });
-  }, { root: thumbsList, rootMargin: '160px' });
+  }, { root: thumbsList, rootMargin: '240px' });
   for (let i = 1; i <= doc.numPages; i++) {
     const el = document.createElement('div');
     el.className = 'thumb-item';
     el.dataset.idx = i - 1;
     const box = document.createElement('div');
     box.className = 'thumb-box';
-    box.textContent = i;
+    const ph = document.createElement('span');
+    ph.className = 'thumb-ph';
+    ph.textContent = i;
+    box.append(ph);
     const num = document.createElement('span');
     num.className = 'thumb-num';
     num.textContent = i;
@@ -65,6 +71,7 @@ export function initThumbs(doc, handle, start = 1) {
     thumbsList.append(el);
     io.observe(el);
   }
+  for (let i = 0; i < Math.min(doc.numPages, 8); i++) renderThumb(items[i]);
   updateThumbsActive(start);
 }
 export function destroyThumbs() {
