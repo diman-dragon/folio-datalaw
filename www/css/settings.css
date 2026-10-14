@@ -1,0 +1,3 @@
+/* Settings screen rows. */
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row-text{min-width:0}

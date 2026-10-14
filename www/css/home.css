@@ -1,0 +1,9 @@
+/* Home screen: document list rows and the empty state. */
+.doc{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.doc-ico{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--accent);flex:none}
+.doc-ico svg{width:22px;height:22px}
+.doc-main{flex:1;min-width:0;text-align:left}
+.doc-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-del{color:var(--muted)}
+.empty{height:100%;display:grid;justify-items:center;align-content:center;gap:8px;text-align:center;color:var(--muted);padding:24px}
+.empty svg{width:56px;height:56px;color:var(--accent);margin-bottom:6px}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Folio</title>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/settings.css">
+<link rel="stylesheet" href="css/viewer.css">
+<link rel="stylesheet" href="css/toast.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<div id="app">
+  <div id="screens">
+    <section class="screen" data-screen="home">
+      <header class="bar">
+        <h1 data-i18n="app.name"></h1>
+        <button class="btn" id="open-btn"><svg width="18" height="18"><use href="img/icons.svg#plus"/></svg><span data-i18n="home.open"></span></button>
+      </header>
+      <div class="body">
+        <ul id="doc-list"></ul>
+        <div id="doc-empty" class="empty" hidden>
+          <svg><use href="img/icons.svg#file"/></svg>
+          <p data-i18n="home.empty"></p>
+          <p class="small" data-i18n="home.emptyHint"></p>
+        </div>
+      </div>
+    </section>
+    <section class="screen" data-screen="settings" hidden>
+      <header class="bar"><h1 data-i18n="nav.settings"></h1></header>
+      <div class="body">
+        <div class="row"><span data-i18n="set.theme"></span>
+          <div class="seg" data-setting="theme"><button data-value="light" data-i18n="set.light"></button><button data-value="dark" data-i18n="set.dark"></button></div></div>
+        <div class="row"><span data-i18n="set.lang"></span>
+          <div class="seg" data-setting="lang"><button data-value="auto" data-i18n="set.auto"></button><button data-value="ru">Русский</button><button data-value="en">English</button></div></div>
+        <div class="row"><div class="row-text"><div data-i18n="set.night"></div><div class="small muted" data-i18n="set.nightHint"></div></div>
+          <div class="seg" data-setting="night"><button data-value="on" data-i18n="set.on"></button><button data-value="off" data-i18n="set.off"></button></div></div>
+        <div class="row"><span data-i18n="set.version"></span><span id="app-version" class="muted"></span></div>
+      </div>
+    </section>
+  </div>
+  <nav id="tabbar">
+    <button data-tab="home"><svg><use href="img/icons.svg#library"/></svg><span data-i18n="nav.home"></span></button>
+    <button data-tab="settings"><svg><use href="img/icons.svg#settings"/></svg><span data-i18n="nav.settings"></span></button>
+  </nav>
+  <section id="viewer" hidden>
+    <header class="bar">
+      <button class="icon-btn" id="viewer-back" data-i18n-aria="viewer.back"><svg><use href="img/icons.svg#back"/></svg></button>
+      <h1 id="viewer-title"></h1>
+      <button id="viewer-page"></button>
+      <button class="icon-btn" id="zoom-out" data-i18n-aria="viewer.zoomOut"><svg><use href="img/icons.svg#zoom-out"/></svg></button>
+      <button class="icon-btn" id="zoom-in" data-i18n-aria="viewer.zoomIn"><svg><use href="img/icons.svg#zoom-in"/></svg></button>
+      <button class="icon-btn" id="night-btn" data-i18n-aria="set.night"><svg><use href="img/icons.svg#moon"/></svg></button>
+    </header>
+    <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
+  </section>
+  <div id="toast"></div>
+</div>
+</body>
+</html>
