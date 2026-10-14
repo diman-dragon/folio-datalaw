@@ -1,23 +1,25 @@
 // Sidebar thumbnails controller with transparent background overlay.
+import { renderPage } from '../formats/pdf/render-page.js';
 const thumbsPanel = document.getElementById('viewer-thumbs');
 const thumbsList = document.getElementById('thumbs-list');
 const thumbsBtn = document.getElementById('thumbs-btn');
 let docRef = null, handleRef = null, curPage = 1, io = null;
 const items = [];
 function renderThumb(item) {
-  if (item.drawn || !docRef) return;
+  if (!item || item.drawn || !docRef) return;
   item.drawn = true;
   docRef.getPage(item.num).then((page) => {
-    const vp0 = page.getViewport({ scale: 1 });
-    const targetW = 88;
-    const vp = page.getViewport({ scale: targetW / vp0.width });
     const canvas = document.createElement('canvas');
-    canvas.width = vp.width;
-    canvas.height = vp.height;
-    return page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise.then(() => {
+    const task = renderPage(page, canvas, 84);
+    return task.promise.then(() => {
       item.box.replaceChildren(canvas);
     });
   }).catch(() => { item.drawn = false; });
+}
+function renderVisible() {
+  const start = Math.max(0, curPage - 4);
+  const end = Math.min(items.length, curPage + 8);
+  for (let i = start; i < end; i++) renderThumb(items[i]);
 }
 export function updateThumbsActive(n) {
   curPage = n;
@@ -26,26 +28,33 @@ export function updateThumbsActive(n) {
     it.el.classList.toggle('active', on);
     if (on && !thumbsPanel.hidden) it.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
+  if (!thumbsPanel.hidden) renderVisible();
 }
 export function toggleThumbs(force) {
   const show = force !== undefined ? force : thumbsPanel.hidden;
   thumbsPanel.hidden = !show;
   thumbsBtn.classList.toggle('active', show);
-  if (show) updateThumbsActive(curPage);
+  if (show) {
+    renderVisible();
+    updateThumbsActive(curPage);
+  }
 }
 export function initThumbs(doc, handle, start = 1) {
   destroyThumbs();
   if (!doc) return;
   docRef = doc; handleRef = handle; curPage = start;
   io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) renderThumb(items[e.target.dataset.idx]); });
-  }, { root: thumbsList, rootMargin: '120px' });
+    entries.forEach((e) => {
+      if (e.isIntersecting && !thumbsPanel.hidden) renderThumb(items[e.target.dataset.idx]);
+    });
+  }, { root: thumbsList, rootMargin: '160px' });
   for (let i = 1; i <= doc.numPages; i++) {
     const el = document.createElement('div');
     el.className = 'thumb-item';
     el.dataset.idx = i - 1;
     const box = document.createElement('div');
     box.className = 'thumb-box';
+    box.textContent = i;
     const num = document.createElement('span');
     num.className = 'thumb-num';
     num.textContent = i;

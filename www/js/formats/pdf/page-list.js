@@ -36,7 +36,9 @@ export async function createPageList({ doc, container, scroller, mode = 'scroll'
       const canvas = document.createElement('canvas');
       e.task = renderPage(e.page, canvas, w);
       await e.task.promise;
+      const layer = e.el.querySelector('.annotate-layer');
       e.el.replaceChildren(canvas);
+      if (layer) e.el.append(layer);
       e.drawnAt = w;
     } catch { /* cancelled or failed page: ignore */ }
   }
@@ -45,7 +47,9 @@ export async function createPageList({ doc, container, scroller, mode = 'scroll'
     e.task?.cancel();
     e.task = null;
     e.drawnAt = 0;
+    const layer = e.el.querySelector('.annotate-layer');
     e.el.replaceChildren();
+    if (layer) e.el.append(layer);
     e.page?.cleanup();
   }
   const io = new IntersectionObserver((list) => list.forEach((x) => {
