@@ -1,19 +1,19 @@
-/* Edit toolbar below header with tools, pin toggle and drawing layer. */
-.edit-bar{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:4px 8px;background:var(--chrome);color:var(--on-chrome);border-bottom:1px solid var(--chrome-line);flex:none;position:relative;z-index:20;overflow-x:auto;scrollbar-width:none}
+/* Edit toolbar below the viewer header: tool buttons, colour dots and the pin toggle. */
+.edit-bar{display:flex;align-items:center;justify-content:safe center;gap:4px;min-height:44px;padding:4px 8px;background:var(--chrome);color:var(--on-chrome);border-bottom:1px solid var(--chrome-line);flex:none;position:relative;z-index:20;overflow-x:auto;scrollbar-width:none}
 .edit-bar::-webkit-scrollbar{display:none}
 .edit-bar[hidden]{display:none!important}
-.edit-tool{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;cursor:pointer;opacity:.88;flex:none;transition:transform .12s,background .15s,opacity .15s}
-.edit-tool svg{width:22px;height:22px;display:block}
-.edit-tool:active{transform:scale(0.92);opacity:1}
-.edit-tool.active{background:rgba(255,255,255,.18);outline:2px solid var(--accent);border-radius:10px;opacity:1;box-shadow:0 1px 6px rgba(0,0,0,.3)}
-.edit-tool#edit-pin.pinned{background:rgba(239,68,68,.2);outline:2px solid #ef4444;border-radius:10px;opacity:1}
-.edit-tool#edit-pin.pinned svg{transform:rotate(30deg);transition:transform .2s}
-.edit-sep{width:1px;height:22px;background:var(--chrome-line);margin:0 2px;flex:none}
-.edit-colors{display:flex;align-items:center;gap:6px;flex:none}
-.color-dot{width:20px;height:20px;border-radius:50%;background:var(--c);border:2px solid rgba(255,255,255,.3);cursor:pointer;flex:none;transition:transform .12s}
-.color-dot:active{transform:scale(0.85)}
-.color-dot.active{transform:scale(1.25);border-color:#fff;box-shadow:0 0 0 2px var(--c),0 2px 6px rgba(0,0,0,.4)}
-.annotate-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;mix-blend-mode:multiply}
-.draw-active #viewer-scroll{overflow:hidden!important;touch-action:none!important;scroll-snap-type:none!important;overscroll-behavior:none!important;user-select:none}
-.draw-active #viewer-pages,.draw-active .pdf-page{touch-action:none!important;scroll-snap-align:none!important}
-.draw-active .annotate-layer{pointer-events:auto!important;touch-action:none!important;cursor:crosshair}
+.edit-tool{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;opacity:.92;transition:background .15s}
+.edit-tool svg{width:24px;height:24px}
+.edit-tool:active{background:var(--accent-soft)}
+.edit-tool.active{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 2px var(--on-chrome);opacity:1}
+.edit-tool.pinned{background:var(--accent-soft);opacity:1}
+.edit-tool.pinned svg{transform:rotate(25deg)}
+.edit-sep{width:1px;height:22px;background:var(--chrome-line);margin:0 3px;flex:none}
+.edit-colors{display:flex;align-items:center;gap:7px;flex:none;padding:0 2px}
+.color-dot{width:18px;height:18px;border-radius:50%;background:var(--c);border:2px solid rgba(255,255,255,.35);flex:none;transition:transform .12s}
+.color-dot:active{transform:scale(.85)}
+.color-dot.active{transform:scale(1.2);border-color:#fff;box-shadow:0 0 0 2px var(--c)}
+#undo-btn,#redo-btn{display:none}
+.show-undo #undo-btn,.show-undo #redo-btn{display:grid}
+#undo-btn:disabled,#redo-btn:disabled{opacity:.35}
+@media (max-width:420px){.show-undo #zoom-in,.show-undo #zoom-out{display:none}}

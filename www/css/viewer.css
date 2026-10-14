@@ -1,19 +1,19 @@
 /* Full-screen document viewer overlay and PDF pages (ribbon + paged-swipe layouts). */
 #viewer{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--viewer-bg)}
-#viewer .bar{gap:3px;padding-left:6px;padding-right:6px}
-#viewer .bar .icon-btn{width:36px;height:36px;min-width:36px}
-#viewer-title{font-size:14px;padding-left:4px;min-width:40px}
-#viewer-page{min-width:48px;padding:0 4px;font-size:13px;color:var(--on-chrome);text-align:center}
+#viewer .bar{gap:2px;padding-left:6px;padding-right:6px}
+#viewer .bar .icon-btn{width:34px;height:34px;min-width:34px}
+#viewer-title{font-size:14px;padding-left:4px;min-width:24px}
+#viewer-page{min-width:44px;padding:0 2px;font-size:13px;color:var(--on-chrome);text-align:center;flex:none}
 #thumbs-btn.active,#edit-btn.active{background:var(--accent-soft);border-radius:10px}
 #viewer-body{position:relative;flex:1;min-height:0;display:flex;overflow:hidden}
 #viewer-scroll{flex:1;min-height:0;overflow:auto;touch-action:pan-x pan-y;overscroll-behavior:contain;padding-bottom:var(--sab)}
-#viewer-pages{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;width:max-content;min-width:100%}
+#viewer-pages{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;width:max-content;min-width:100%;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #viewer-scroll.paged{scroll-snap-type:x mandatory}
 #viewer-scroll.paged.zoomed{scroll-snap-type:none}
 .paged #viewer-pages{flex-direction:row;gap:8px;padding-top:0;padding-bottom:0;min-height:100%}
 .paged .pdf-page{scroll-snap-align:center;scroll-snap-stop:always}
-.pdf-page{position:relative;flex:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
-.pdf-page canvas{position:absolute;inset:0;width:100%;height:100%}
-.night .pdf-page canvas{filter:invert(1) hue-rotate(180deg)}
+.pdf-page{position:relative;flex:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35);contain:layout style}
+.pdf-page>canvas.page-img{position:absolute;inset:0;width:100%;height:100%}
+.night .pdf-page>canvas.page-img{filter:invert(1) hue-rotate(180deg)}
 .night .pdf-page{background:#000}
 .viewer-msg{padding:48px 24px;text-align:center;color:var(--muted)}

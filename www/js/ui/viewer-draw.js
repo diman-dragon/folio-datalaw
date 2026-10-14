@@ -1,72 +1,85 @@
-// Drawing and annotation gestures across document pages.
-let activeTool = null, activeColor = '#2563eb', drawing = false, curCtx = null, curRect = null, dpr = 1;
-const pagesContainer = document.getElementById('viewer-pages');
-function getCanvas(pageEl) {
-  let c = pageEl.querySelector('.annotate-layer');
-  if (!c) {
-    c = document.createElement('canvas');
-    c.className = 'annotate-layer';
-    const r = pageEl.getBoundingClientRect();
-    c.width = Math.round((r.width || pageEl.clientWidth || 300) * (window.devicePixelRatio || 1));
-    c.height = Math.round((r.height || pageEl.clientHeight || 400) * (window.devicePixelRatio || 1));
-    pageEl.append(c);
+// Active tool / colour state and the freehand tools (pen, marker, eraser); strokes preview live and are stored on release.
+import { ensureLayers } from './annot-layers.js';
+import { addItem } from './annot-store.js';
+import { HL_ALPHA } from './annot-paint.js';
+import { emit } from '../core/bus.js';
+const pages = document.getElementById('viewer-pages');
+const root = document.getElementById('viewer');
+const WIDTH = { pen: 2.6, highlighter: 20, eraser: 26 };
+const KIND = { pen: 'pen', highlighter: 'hl', eraser: 'er' };
+let tool = null, color = '#2563eb', g = null;
+export const getDrawTool = () => tool;
+export const getDrawColor = () => color;
+export const setDrawColor = (c) => { color = c; };
+export function setDrawTool(next) {
+  finish();
+  tool = next;
+  root.classList.toggle('draw-active', Boolean(next));
+  root.dataset.tool = next ?? '';
+  emit('toolchange', next);
+}
+const norm = (v) => Math.round(Math.min(1, Math.max(0, v)) * 10000) / 10000;
+const point = (e) => [norm((e.clientX - g.r.left) / g.r.width), norm((e.clientY - g.r.top) / g.r.height)];
+function prepare(ctx, cw) {
+  Object.assign(ctx, { lineCap: 'round', lineJoin: 'round', lineWidth: g.w * cw, strokeStyle: color });
+  if (g.k === 'eraser') ctx.globalCompositeOperation = 'destination-out';
+}
+function down(e) {
+  if (g && e.pointerId !== g.pid) { finish(); return; }
+  const el = e.target.closest?.('.pdf-page');
+  if (!KIND[tool] || !e.isPrimary || !el?.dataset.ready) return;
+  e.preventDefault();
+  const { ink, mark } = ensureLayers(el);
+  const r = el.getBoundingClientRect();
+  g = { pid: e.pointerId, el, r, ink, mark, k: tool, w: WIDTH[tool] / r.width, pts: [], n: 1, raf: 0, live: null };
+  const ic = ink.getContext('2d'), mc = mark.getContext('2d');
+  if (tool === 'highlighter') {
+    g.live = Object.assign(document.createElement('canvas'), { className: 'annot annot-live', width: ink.width, height: ink.height });
+    el.append(g.live);
+    g.ctxs = [g.live.getContext('2d')];
+  } else g.ctxs = tool === 'eraser' ? [ic, mc] : [ic];
+  g.ctxs.forEach((c) => { c.save(); prepare(c, ink.width); });
+  g.pts.push(point(e));
+  g.mid = g.pts[0];
+  g.ctxs.forEach((c) => { c.beginPath(); c.moveTo(g.mid[0] * ink.width, g.mid[1] * ink.height); c.lineTo(g.mid[0] * ink.width + 0.01, g.mid[1] * ink.height); c.stroke(); });
+  try { pages.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+}
+function flush() {
+  if (!g) return;
+  g.raf = 0;
+  const cw = g.ink.width, ch = g.ink.height;
+  for (; g.n < g.pts.length; g.n++) {
+    const c = g.pts[g.n - 1], p = g.pts[g.n], mid = [(c[0] + p[0]) / 2, (c[1] + p[1]) / 2];
+    g.ctxs.forEach((x) => { x.beginPath(); x.moveTo(g.mid[0] * cw, g.mid[1] * ch); x.quadraticCurveTo(c[0] * cw, c[1] * ch, mid[0] * cw, mid[1] * ch); x.stroke(); });
+    g.mid = mid;
   }
-  return c;
 }
-function setupCanvasCtx(ctx, tool) {
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.globalCompositeOperation = 'multiply';
-  if (tool === 'pen') {
-    ctx.strokeStyle = activeColor; ctx.globalAlpha = 0.72; ctx.lineWidth = 3 * dpr;
-  } else if (tool === 'highlighter') {
-    ctx.strokeStyle = activeColor; ctx.globalAlpha = 0.38; ctx.lineWidth = 22 * dpr; ctx.lineCap = 'square';
-  } else if (tool === 'underline') {
-    ctx.strokeStyle = activeColor; ctx.globalAlpha = 0.8; ctx.lineWidth = 3.5 * dpr;
-  } else if (tool === 'eraser') {
-    ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1.0; ctx.lineWidth = 28 * dpr;
+function move(e) {
+  if (!g || e.pointerId !== g.pid) return;
+  e.preventDefault();
+  const list = e.getCoalescedEvents?.() ?? [];
+  (list.length ? list : [e]).forEach((ev) => g.pts.push(point(ev)));
+  g.raf ||= requestAnimationFrame(flush);
+}
+function finish() {
+  if (!g) return;
+  cancelAnimationFrame(g.raf);
+  flush();
+  const cw = g.ink.width, ch = g.ink.height, last = g.pts.at(-1);
+  g.ctxs.forEach((x) => { x.beginPath(); x.moveTo(g.mid[0] * cw, g.mid[1] * ch); x.lineTo(last[0] * cw, last[1] * ch); x.stroke(); });
+  if (g.live) {
+    const m = g.mark.getContext('2d');
+    m.globalAlpha = HL_ALPHA;
+    m.drawImage(g.live, 0, 0);
+    m.globalAlpha = 1;
+    g.live.remove();
   }
+  g.ctxs.forEach((c) => c.restore());
+  addItem(Number(g.el.dataset.i), { k: KIND[g.k], c: color, w: Math.round(g.w * 1e5) / 1e5, p: g.pts });
+  g = null;
 }
-function onPointerDown(e) {
-  if (!activeTool || activeTool === 'text-select') return;
-  const page = e.target.closest('.pdf-page');
-  if (!page) return;
-  e.preventDefault(); e.stopPropagation();
-  const canvas = getCanvas(page);
-  dpr = window.devicePixelRatio || 1;
-  curRect = canvas.getBoundingClientRect();
-  curCtx = canvas.getContext('2d');
-  setupCanvasCtx(curCtx, activeTool);
-  drawing = true;
-  const x = (e.clientX - curRect.left) * dpr;
-  const y = (e.clientY - curRect.top) * dpr;
-  curCtx.beginPath();
-  curCtx.moveTo(x, y);
-  try { canvas.setPointerCapture(e.pointerId); } catch {}
-}
-function onPointerMove(e) {
-  if (!drawing || !curCtx || !curRect) return;
-  e.preventDefault(); e.stopPropagation();
-  const x = (e.clientX - curRect.left) * dpr;
-  const y = (e.clientY - curRect.top) * dpr;
-  curCtx.lineTo(x, y);
-  curCtx.stroke();
-}
-function onPointerUp(e) {
-  if (!drawing) return;
-  e?.preventDefault?.(); e?.stopPropagation?.();
-  drawing = false; curCtx = null; curRect = null;
-}
-export function setDrawTool(tool) {
-  activeTool = tool;
-  const on = Boolean(tool && tool !== 'text-select' && tool !== 'underline');
-  const root = document.getElementById('viewer');
-  root.classList.toggle('draw-active', on);
-  root.classList.toggle('tool-text-select', tool === 'text-select');
-  root.classList.toggle('tool-underline', tool === 'underline');
-}
-export function setDrawColor(color) { activeColor = color; }
-export function getDrawTool() { return activeTool; }
-pagesContainer.addEventListener('pointerdown', onPointerDown, { passive: false });
-pagesContainer.addEventListener('pointermove', onPointerMove, { passive: false });
-pagesContainer.addEventListener('pointerup', onPointerUp, { passive: false });
-pagesContainer.addEventListener('pointercancel', onPointerUp, { passive: false });
+const up = (e) => { if (g && e.pointerId === g.pid) finish(); };
+pages.addEventListener('pointerdown', down, { passive: false });
+pages.addEventListener('pointermove', move, { passive: false });
+pages.addEventListener('pointerup', up);
+pages.addEventListener('pointercancel', up);

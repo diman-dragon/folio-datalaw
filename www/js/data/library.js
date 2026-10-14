@@ -1,5 +1,6 @@
 // Document library: records (+ bytes for files opened with "Open"; folder files are only referenced by uri).
 import { tx, wait, finish } from './db.js';
+import { fingerprint } from './fingerprint.js';
 export async function listDocs() {
   const t = await tx('meta');
   const all = await wait(t.objectStore('meta').getAll());
@@ -14,10 +15,11 @@ export async function getBlob(id) {
   return (await wait(t.objectStore('blobs').get(id))) ?? null;
 }
 export async function addDoc(file) {
-  const existing = (await listDocs()).find((d) => d.src !== 'folder' && d.name === file.name && d.size === file.size);
-  if (existing) return updateDoc(existing.id, { openedAt: Date.now() });
+  const fp = await fingerprint(file);
+  const existing = (await listDocs()).find((d) => d.src !== 'folder' && d.size === file.size && (d.fp ? d.fp === fp : d.name === file.name));
+  if (existing) return updateDoc(existing.id, { openedAt: Date.now(), fp });
   const now = Date.now();
-  const meta = { id: crypto.randomUUID(), name: file.name, size: file.size, addedAt: now, openedAt: now, lastPage: 1 };
+  const meta = { id: crypto.randomUUID(), name: file.name, size: file.size, fp, addedAt: now, openedAt: now, lastPage: 1 };
   const t = await tx(['meta', 'blobs'], 'readwrite');
   t.objectStore('meta').put(meta);
   t.objectStore('blobs').put(file, meta.id);
@@ -27,7 +29,9 @@ export async function addDoc(file) {
 export async function updateDoc(id, patch) {
   const t = await tx('meta', 'readwrite');
   const store = t.objectStore('meta');
-  const meta = { ...(await wait(store.get(id))), ...patch };
+  const old = await wait(store.get(id));
+  if (!old) return null; // deleted meanwhile (e.g. while its cover was rendering): do not recreate a broken record
+  const meta = { ...old, ...patch };
   store.put(meta);
   await finish(t);
   return meta;

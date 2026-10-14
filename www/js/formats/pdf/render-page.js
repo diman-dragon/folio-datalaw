@@ -1,8 +1,8 @@
 // Renders one pdf.js page into a canvas at device resolution (capped to protect memory).
-const MAX_PIXELS = 8_000_000;
+const MAX_PIXELS = 6_000_000;
 export function renderPage(page, canvas, cssWidth) {
   const base = page.getViewport({ scale: 1 });
-  let scale = (cssWidth / base.width) * Math.min(window.devicePixelRatio || 1, 2.5);
+  let scale = (cssWidth / base.width) * Math.min(window.devicePixelRatio || 1, 2);
   const px = base.width * scale * base.height * scale;
   if (px > MAX_PIXELS) scale *= Math.sqrt(MAX_PIXELS / px);
   const viewport = page.getViewport({ scale });

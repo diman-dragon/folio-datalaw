@@ -1,15 +1,15 @@
-/* Sidebar thumbnails overlay with transparent background. */
-.viewer-thumbs{position:absolute;left:0;top:0;bottom:0;width:96px;z-index:25;pointer-events:none;display:flex;flex-direction:column;background:transparent!important}
+/* Page thumbnails: narrow overlay on the left; only the thumbnails take touches, the page stays usable between them. */
+.viewer-thumbs{position:absolute;left:0;top:0;bottom:0;width:88px;z-index:25;pointer-events:none}
 .viewer-thumbs[hidden]{display:none!important}
-#thumbs-list{pointer-events:auto;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding:10px 8px;display:flex;flex-direction:column;gap:10px;background:transparent!important;scrollbar-width:none}
+#thumbs-list{position:relative;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;padding:10px 8px calc(10px + var(--sab));display:flex;flex-direction:column;align-items:center;gap:10px;scrollbar-width:none;overscroll-behavior:contain;pointer-events:none}
 #thumbs-list::-webkit-scrollbar{display:none}
-.thumb-item{position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
-.thumb-item:active{transform:scale(0.95)}
-.thumb-box{position:relative;width:80px;min-height:106px;background:#fff;border:1.5px solid rgba(0,0,0,.15);border-radius:6px;box-shadow:0 3px 12px rgba(0,0,0,.35);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.thumb-item{flex:none;display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;transition:transform .12s}
+.thumb-item:active{transform:scale(.95)}
+.thumb-box{position:relative;width:72px;height:var(--th,102px);background:#fff;border:1.5px solid rgba(0,0,0,.2);border-radius:5px;box-shadow:0 3px 10px rgba(0,0,0,.35);overflow:hidden}
+.thumb-box canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
 .night .thumb-box{background:#111;border-color:rgba(255,255,255,.2)}
 .night .thumb-box canvas{filter:invert(1) hue-rotate(180deg)}
-.thumb-box canvas{width:100%;height:auto;display:block}
-.thumb-ph{font-size:16px;font-weight:700;color:#94a3b8}
-.thumb-item.active .thumb-box{outline:2.5px solid var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.55)}
+.thumb-ph{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:700;color:#94a3b8}
+.thumb-item.active .thumb-box{outline:2.5px solid var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.55)}
 .thumb-num{margin-top:4px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.75);padding:1px 7px;border-radius:10px}
 .thumb-item.active .thumb-num{background:var(--accent);color:var(--on-accent)}

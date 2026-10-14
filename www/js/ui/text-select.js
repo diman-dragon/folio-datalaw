@@ -1,72 +1,48 @@
-// Handles text tap selection, range expansion and copy bubble menu.
+// Text selection controller: owns the selection (page + char range), paints it and runs the menu actions.
+import { lineBoxes, normRects, textOf } from './sel-chars.js';
+import { paintSel, removeSel } from './sel-view.js';
+import { showMenu, hideMenu, onMenuAction } from './text-menu.js';
+import { addItem } from './annot-store.js';
+import { repaintPage } from './annot-layers.js';
+import { getDrawColor } from './viewer-draw.js';
+import { copyText } from './clipboard.js';
+import { pushBack } from './back.js';
 import { toast } from './toast.js';
 import { t } from '../core/i18n.js';
-const menu = document.getElementById('text-menu');
-const copyBtn = document.getElementById('text-copy-btn');
-export function hideTextMenu() {
-  if (menu) menu.hidden = true;
+const scroller = document.getElementById('viewer-scroll');
+let S = null, popBack = null;
+export const getSel = () => S;
+export function clearSel() {
+  S = null;
+  removeSel();
+  hideMenu();
+  popBack?.();
+  popBack = null;
 }
-function showMenuForRange(range) {
-  const r = range.getBoundingClientRect();
-  if (!r || (r.width === 0 && r.height === 0)) return;
-  menu.hidden = false;
-  const top = Math.max(52, r.top - 8);
-  const left = Math.min(window.innerWidth - 70, Math.max(70, r.left + r.width / 2));
-  menu.style.top = `${top}px`;
-  menu.style.left = `${left}px`;
+export function placeMenu() {
+  if (!S) return;
+  if (!S.el.dataset.ready) { clearSel(); return; }
+  const pr = S.el.getBoundingClientRect(), b = scroller.getBoundingClientRect();
+  const f = S.lines[0], l = S.lines.at(-1);
+  const anchor = { left: pr.left + Math.min(...S.lines.map((x) => x.x)), right: pr.left + Math.max(...S.lines.map((x) => x.x + x.w)), top: pr.top + f.y, bottom: pr.top + l.y + l.h };
+  if (anchor.bottom < b.top || anchor.top > b.bottom) hideMenu(); else showMenu(anchor, b);
 }
-function selectWordAt(e) {
-  let range = null;
-  if (document.caretPositionFromPoint) {
-    const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
-    if (pos?.offsetNode?.nodeType === Node.TEXT_NODE) {
-      range = getWordRange(pos.offsetNode, pos.offset);
-    }
-  } else if (document.caretRangeFromPoint) {
-    const r = document.caretRangeFromPoint(e.clientX, e.clientY);
-    if (r?.startContainer?.nodeType === Node.TEXT_NODE) {
-      range = getWordRange(r.startContainer, r.startOffset);
-    }
-  }
-  if (range) {
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-    showMenuForRange(range);
-  }
+export function select(el, chars, a, b, { menu = true } = {}) {
+  S = { el, chars, a, b, lines: lineBoxes(chars, a, b) };
+  popBack ??= pushBack(clearSel);
+  paintSel(el, S.lines);
+  if (menu) placeMenu(); else hideMenu();
 }
-function getWordRange(node, offset) {
-  const s = node.textContent;
-  if (!s) return null;
-  let i0 = offset, i1 = offset;
-  while (i0 > 0 && /\S/.test(s[i0 - 1])) i0--;
-  while (i1 < s.length && /\S/.test(s[i1])) i1++;
-  if (i0 >= i1) return null;
-  const r = document.createRange();
-  r.setStart(node, i0);
-  r.setEnd(node, i1);
-  return r;
+// Marks a char range as highlight ('th') or underline ('tu') annotation.
+export function applyMark(kind, el, chars, a, b) {
+  const c = getDrawColor();
+  addItem(Number(el.dataset.i), { k: kind, c: kind === 'th' && c === '#1e293b' ? '#facc15' : c, r: normRects(lineBoxes(chars, a, b), el) });
+  repaintPage(el);
 }
-copyBtn?.addEventListener('click', async () => {
-  const text = window.getSelection()?.toString() || '';
-  if (text) {
-    try { await navigator.clipboard.writeText(text); } catch { document.execCommand('copy'); }
-    toast(t('viewer.copied'));
-  }
-  hideTextMenu();
-  window.getSelection()?.removeAllRanges();
-});
-document.addEventListener('pointerup', (e) => {
-  if (e.target.closest('#text-menu')) return;
-  const inText = e.target.closest('.textLayer');
-  if (!inText) { hideTextMenu(); return; }
-  setTimeout(() => {
-    const sel = window.getSelection();
-    const str = sel?.toString()?.trim();
-    if (str && sel.rangeCount > 0) {
-      showMenuForRange(sel.getRangeAt(0));
-    } else if (inText) {
-      selectWordAt(e);
-    }
-  }, 20);
+onMenuAction(async (act) => {
+  if (!S) return;
+  const { el, chars, a, b } = S;
+  if (act === 'copy') { if (await copyText(textOf(chars, a, b))) toast(t('viewer.copied')); }
+  else applyMark(act === 'hl' ? 'th' : 'tu', el, chars, a, b);
+  clearSel();
 });

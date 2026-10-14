@@ -5,6 +5,9 @@ import { pushBack } from './back.js';
 import { setHandle, showPage } from './viewer-toolbar.js';
 import { initThumbs, updateThumbsActive, destroyThumbs } from './viewer-thumbs.js';
 import { closeEditBar } from './viewer-edit.js';
+import { setActiveHandle } from './viewer-handle.js';
+import { clearAnnots } from './annot-store.js';
+import { clearSel } from './text-select.js';
 import { t } from '../core/i18n.js';
 import { getReadMode } from '../core/readmode.js';
 const root = document.getElementById('viewer');
@@ -19,6 +22,9 @@ export function closeViewer() {
   try { handle?.destroy(); } catch (err) { console.error(err); }
   handle = null;
   setHandle(null);
+  setActiveHandle(null);
+  clearSel();
+  clearAnnots();
   destroyThumbs();
   closeEditBar(true);
   popBack?.();
@@ -41,6 +47,7 @@ export async function openViewer(meta, blob) {
     if (mine !== session) { h.destroy(); return; }
     handle = h;
     setHandle(h);
+    setActiveHandle(h);
     initThumbs(h.doc, h, meta.lastPage ?? 1);
     setStatus(null);
   } catch (err) {

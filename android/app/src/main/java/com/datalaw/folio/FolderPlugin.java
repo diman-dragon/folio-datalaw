@@ -97,6 +97,11 @@ public class FolderPlugin extends Plugin {
         new Thread(() -> {
             File dir = new File(getContext().getCacheDir(), "folio-stage");
             File out = new File(dir, Integer.toHexString(uriStr.hashCode()) + ".bin");
+            File[] old = dir.listFiles();
+            if (old != null) {
+                long cutoff = System.currentTimeMillis() - 60L * 60L * 1000L;
+                for (File f : old) if (f.lastModified() < cutoff) f.delete(); // staged copies are read right away; do not let the cache grow
+            }
             try (InputStream in = getContext().getContentResolver().openInputStream(Uri.parse(uriStr))) {
                 if (in == null) throw new IllegalStateException("cannot open");
                 dir.mkdirs();

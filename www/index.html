@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="css/viewer-thumbs.css">
 <link rel="stylesheet" href="css/viewer-edit.css">
 <link rel="stylesheet" href="css/text-layer.css">
+<link rel="stylesheet" href="css/text-select.css">
+<link rel="stylesheet" href="css/annot.css">
 <link rel="stylesheet" href="css/toast.css">
 <script type="module" src="js/main.js"></script>
 </head>
@@ -63,6 +65,8 @@
       <button class="icon-btn" id="thumbs-btn" data-i18n-aria="viewer.thumbs"><svg><use href="img/icons.svg#thumbnails"/></svg></button>
       <h1 id="viewer-title"></h1>
       <button class="icon-btn" id="edit-btn" data-i18n-aria="viewer.edit"><svg><use href="img/icons.svg#edit"/></svg></button>
+      <button class="icon-btn" id="undo-btn" data-i18n-aria="edit.undo" disabled><svg><use href="img/icons.svg#undo"/></svg></button>
+      <button class="icon-btn" id="redo-btn" data-i18n-aria="edit.redo" disabled><svg><use href="img/icons.svg#redo"/></svg></button>
       <button id="viewer-page"></button>
       <button class="icon-btn" id="mode-btn" data-i18n-aria="viewer.mode"></button>
       <button class="icon-btn" id="zoom-out" data-i18n-aria="viewer.zoomOut"><svg><use href="img/icons.svg#zoom-out"/></svg></button>
@@ -77,11 +81,11 @@
       <button class="icon-btn edit-tool" data-tool="underline" data-i18n-aria="edit.underline"><svg><use href="img/icons.svg#underline"/></svg></button>
       <div class="edit-sep"></div>
       <div class="edit-colors">
-        <button class="color-dot active" data-color="#2563eb" style="--c:#2563eb" title="Синий"></button>
-        <button class="color-dot" data-color="#ef4444" style="--c:#ef4444" title="Красный"></button>
-        <button class="color-dot" data-color="#facc15" style="--c:#facc15" title="Желтый"></button>
-        <button class="color-dot" data-color="#10b981" style="--c:#10b981" title="Зеленый"></button>
-        <button class="color-dot" data-color="#1e293b" style="--c:#1e293b" title="Темный"></button>
+        <button class="color-dot active" data-color="#2563eb" style="--c:#2563eb" data-i18n-aria="color.blue"></button>
+        <button class="color-dot" data-color="#ef4444" style="--c:#ef4444" data-i18n-aria="color.red"></button>
+        <button class="color-dot" data-color="#facc15" style="--c:#facc15" data-i18n-aria="color.yellow"></button>
+        <button class="color-dot" data-color="#10b981" style="--c:#10b981" data-i18n-aria="color.green"></button>
+        <button class="color-dot" data-color="#1e293b" style="--c:#1e293b" data-i18n-aria="color.dark"></button>
       </div>
       <div class="edit-sep"></div>
       <button class="icon-btn edit-tool" id="edit-pin" data-tool="pin" data-i18n-aria="viewer.pin"><svg><use href="img/icons.svg#pin"/></svg></button>
@@ -91,7 +95,9 @@
       <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
     </div>
     <div id="text-menu" class="text-bubble-menu" hidden>
-      <button id="text-copy-btn"><svg><use href="img/icons.svg#copy"/></svg><span data-i18n="viewer.copy"></span></button>
+      <button data-act="copy"><svg><use href="img/icons.svg#copy"/></svg><span data-i18n="viewer.copy"></span></button>
+      <button data-act="hl"><svg><use href="img/icons.svg#highlighter"/></svg><span data-i18n="viewer.highlight"></span></button>
+      <button data-act="ul"><svg><use href="img/icons.svg#underline"/></svg><span data-i18n="viewer.underline"></span></button>
     </div>
   </section>
   <div id="toast"></div>
