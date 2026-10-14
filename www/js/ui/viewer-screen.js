@@ -4,6 +4,7 @@ import { updateDoc } from '../data/library.js';
 import { pushBack } from './back.js';
 import { setHandle, showPage } from './viewer-toolbar.js';
 import { t } from '../core/i18n.js';
+import { getReadMode } from '../core/readmode.js';
 const root = document.getElementById('viewer');
 const pages = document.getElementById('viewer-pages');
 const scroller = document.getElementById('viewer-scroll');
@@ -32,7 +33,7 @@ export async function openViewer(meta, blob) {
   try {
     const mod = find(meta.name, blob.type);
     const onPage = (n, total) => { showPage(n, total); saveLater(meta.id, n); };
-    const h = await mod.mount({ container: pages, scroller, blob, startPage: meta.lastPage ?? 1, onPage });
+    const h = await mod.mount({ container: pages, scroller, blob, startPage: meta.lastPage ?? 1, mode: getReadMode(), onPage });
     if (mine !== session) { h.destroy(); return; }
     handle = h;
     setHandle(h);

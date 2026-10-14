@@ -9,6 +9,8 @@ import './ui/viewer-night.js';
 import { toast } from './ui/toast.js';
 import { openFile } from './app/open-file.js';
 import { watchIntents } from './io/launch-intent.js';
+import { watchFolder } from './app/folder-watch.js';
 applyTheme();
 applyLang();
 watchIntents(openFile, () => toast(t('home.pickFail')));
+watchFolder();

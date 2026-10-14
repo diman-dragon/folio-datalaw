@@ -1,11 +1,13 @@
-// IndexedDB connection (stores "meta" = records, "blobs" = file bytes) and promise helpers.
+// IndexedDB connection (stores "meta" = records, "blobs" = file bytes, "covers" = thumbnails) and promise helpers.
 let opening;
 export function db() {
   opening ??= new Promise((res, rej) => {
-    const r = indexedDB.open('folio', 1);
+    const r = indexedDB.open('folio', 2);
     r.onupgradeneeded = () => {
-      r.result.createObjectStore('meta', { keyPath: 'id' });
-      r.result.createObjectStore('blobs');
+      const d = r.result;
+      if (!d.objectStoreNames.contains('meta')) d.createObjectStore('meta', { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs');
+      if (!d.objectStoreNames.contains('covers')) d.createObjectStore('covers');
     };
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);

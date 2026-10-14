@@ -1,6 +1,7 @@
 // Orchestration: File -> library record -> viewer; stored record -> viewer.
 import { find } from '../formats/registry.js';
-import { addDoc, getDoc, updateDoc } from '../data/library.js';
+import { addDoc, getMeta, updateDoc } from '../data/library.js';
+import { loadBlob } from './doc-source.js';
 import { openViewer } from '../ui/viewer-screen.js';
 import { toast } from '../ui/toast.js';
 import { t } from '../core/i18n.js';
@@ -12,9 +13,10 @@ export async function openFile(file) {
   await openViewer(meta, file);
 }
 export async function openStored(id) {
-  const rec = await getDoc(id);
-  if (!rec) return;
+  if (!(await getMeta(id))) return;
   const meta = await updateDoc(id, { openedAt: Date.now() });
+  const blob = await loadBlob(meta);
+  if (!blob) return;
   emit('libchange');
-  await openViewer(meta, rec.blob);
+  await openViewer(meta, blob);
 }

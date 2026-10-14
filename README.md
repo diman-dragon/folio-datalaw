@@ -26,8 +26,8 @@ npm run bump         # версия +1 в последней цифре, зат�
 main.js                 точка входа
 core/                   storage, platform, bus, theme, i18n(+locales), night, format, version(генерируется)
 data/                   db.js (IndexedDB), library.js (записи + файлы)
-io/                     pick-file.js (выбор файла), launch-intent.js («Открыть с помощью Folio»)
-app/open-file.js        файл -> библиотека -> viewer
+io/                     pick-file.js, launch-intent.js («Открыть с помощью Folio»), folder.js (плагин Folder)
+app/                    open-file, doc-source, folder-sync/-watch (папка -> библиотека), cover-loader (обложки)
 ui/                     tabs, back, toast, icon, home-screen, settings-screen, viewer-screen/-toolbar/-night
 formats/registry.js     реестр модулей;  formats/index.js — единственное место подключения
 formats/pdf/            pdfjs, open-doc, render-page, page-list, page-tracker, zoom, mount, index
@@ -42,8 +42,11 @@ formats/pdf/            pdfjs, open-doc, render-page, page-list, page-tracker, z
 ## Темы
 `www/css/theme.css`: светлая — песочный фон + тёмно-коричневые панели; тёмная — чистый чёрный (AMOLED). Все цвета — токены в одном файле.
 
-## Известные ограничения 0.0.1
+## Известные ограничения
 - Имя файла при «Открыть с помощью» недоступно из WebView (content://) — подставляется «Document <дата>.pdf». Решение: маленький нативный плагин, позже.
 - Файл целиком читается в память; очень большие PDF (сотни МБ) могут не открыться.
 - До первого рендера высота страниц берётся по первой странице (возможен небольшой «скачок» в документах с разными форматами страниц).
 - Запрос пароля PDF — через системный `prompt()`.
+
+## Папка библиотеки
+Нативный плагин `android/.../FolderPlugin.java` (Storage Access Framework): `pick`, `list`, `stage`. Права на папку сохраняются между запусками. В браузере (`npm run dev`) выбор папки недоступен.
