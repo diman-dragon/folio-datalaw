@@ -1,4 +1,4 @@
-// Selection overlay inside a page: translucent line boxes plus two drag handles (the text underneath stays visible).
+// Selection overlay inside a page (percent units, so it follows zoom): translucent line boxes plus two drag handles.
 let layer = null, boxes = null, h0 = null, h1 = null;
 const handle = (side) => Object.assign(document.createElement('div'), { className: `sel-handle ${side}` });
 function build(pageEl) {
@@ -11,18 +11,18 @@ function build(pageEl) {
   layer.append(boxes, h0, h1);
   pageEl.append(layer);
 }
-const place = (h, x, y) => { h.style.transform = `translate(${x}px,${y}px)`; };
-export function paintSel(pageEl, lines, { handles = true } = {}) {
+const pct = (v, t) => `${(v / t) * 100}%`;
+export function paintSel(pageEl, T, lines, { handles = true } = {}) {
   if (!layer || layer.parentNode !== pageEl) { removeSel(); build(pageEl); }
   boxes.replaceChildren(...lines.map((l) => {
     const d = document.createElement('div');
     d.className = 'sel-box';
-    d.style.cssText = `left:${l.x}px;top:${l.y}px;width:${l.w}px;height:${l.h}px`;
+    d.style.cssText = `left:${pct(l.x, T.w)};top:${pct(l.y, T.h)};width:${pct(l.w, T.w)};height:${pct(l.h, T.h)}`;
     return d;
   }));
   const f = lines[0], l = lines.at(-1);
-  place(h0, f.x, f.y + f.h);
-  place(h1, l.x + l.w, l.y + l.h);
+  h0.style.cssText = `left:${pct(f.x, T.w)};top:${pct(f.y + f.h, T.h)}`;
+  h1.style.cssText = `left:${pct(l.x + l.w, T.w)};top:${pct(l.y + l.h, T.h)}`;
   h0.hidden = h1.hidden = !handles;
 }
 export function removeSel() { layer?.remove(); layer = boxes = h0 = h1 = null; }

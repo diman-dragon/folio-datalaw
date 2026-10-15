@@ -4,7 +4,9 @@ import { updateDoc } from '../data/library.js';
 import { pushBack } from './back.js';
 import { setHandle, showPage } from './viewer-toolbar.js';
 import { initThumbs, updateThumbsActive, destroyThumbs } from './viewer-thumbs.js';
-import { closeEditBar } from './viewer-edit.js';
+import { suspendPanel, restorePanel } from './tools-panel.js';
+import { startAwake, stopAwake } from '../core/awake.js';
+import { emit } from '../core/bus.js';
 import { setActiveHandle } from './viewer-handle.js';
 import { clearAnnots } from './annot-store.js';
 import { clearSel } from './text-select.js';
@@ -16,9 +18,18 @@ const scroller = document.getElementById('viewer-scroll');
 const status = document.getElementById('viewer-status');
 let handle = null, popBack = null, session = 0, saveTimer;
 const setStatus = (text) => { status.hidden = !text; status.textContent = text ?? ''; };
-const saveLater = (id, n) => { clearTimeout(saveTimer); saveTimer = setTimeout(() => updateDoc(id, { lastPage: n }), 600); };
+let pending = null;
+const saveLater = (id, n) => { pending = { id, n }; clearTimeout(saveTimer); saveTimer = setTimeout(flushSave, 600); };
+async function flushSave() {
+  clearTimeout(saveTimer);
+  const p = pending;
+  pending = null;
+  if (p) { await updateDoc(p.id, { lastPage: p.n }); emit('libchange'); }
+}
 export function closeViewer() {
   session++;
+  stopAwake();
+  flushSave();
   try { handle?.destroy(); } catch (err) { console.error(err); }
   handle = null;
   setHandle(null);
@@ -26,7 +37,7 @@ export function closeViewer() {
   clearSel();
   clearAnnots();
   destroyThumbs();
-  closeEditBar(true);
+  suspendPanel();
   popBack?.();
   popBack = null;
   root.hidden = true;
@@ -42,13 +53,15 @@ export async function openViewer(meta, blob) {
   popBack = pushBack(closeViewer);
   try {
     const mod = find(meta.name, blob.type);
-    const onPage = (n, total) => { showPage(n, total); saveLater(meta.id, n); updateThumbsActive(n); };
+    const onPage = (n, total) => { showPage(n, total); saveLater(meta.id, n); updateThumbsActive(n); emit('pagechange', { n, total }); };
     const h = await mod.mount({ container: pages, scroller, blob, startPage: meta.lastPage ?? 1, mode: getReadMode(), onPage });
     if (mine !== session) { h.destroy(); return; }
     handle = h;
     setHandle(h);
     setActiveHandle(h);
     initThumbs(h.doc, h, meta.lastPage ?? 1);
+    restorePanel();
+    startAwake();
     setStatus(null);
   } catch (err) {
     console.error(err);

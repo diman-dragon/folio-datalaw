@@ -3,6 +3,7 @@ import { listDocs, removeDoc } from '../data/library.js';
 import { openStored } from '../app/open-file.js';
 import { docCard } from './doc-card.js';
 import { watchCovers } from './cover-view.js';
+import { renderShelf } from './reading-shelf.js';
 import './home-toolbar.js';
 import { toast } from './toast.js';
 import { t } from '../core/i18n.js';
@@ -15,13 +16,13 @@ async function refresh() {
   const cards = docs.map((meta) => ({ meta, li: docCard(meta) }));
   list.replaceChildren(...cards.map((c) => c.li));
   empty.hidden = docs.length > 0;
-  watchCovers(body, cards);
+  watchCovers(body, [...renderShelf(docs), ...cards]);
 }
 async function ask(li) {
   if (li.dataset.src === 'folder') return;
   if (confirm(t('home.deleteQ'))) { await removeDoc(li.dataset.id); refresh(); }
 }
-list.addEventListener('click', (e) => {
+body.addEventListener('click', (e) => {
   const li = e.target.closest('.doc');
   if (!li) return;
   if (e.target.closest('.doc-del')) ask(li);

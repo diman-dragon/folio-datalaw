@@ -1,19 +1,29 @@
-// Page thumbnails sidebar: lazy skeleton list, tap to jump, active page follows the reading position.
-import { createThumbQueue } from './thumb-queue.js';
+// Page thumbnails sidebar (transparent overlay, never moves the document): lazy list, tap to jump, shown or hidden (remembered).
 import { pushBack } from './back.js';
+import { getPref, setPref } from '../core/prefs.js';
 const panel = document.getElementById('viewer-thumbs');
 const list = document.getElementById('thumbs-list');
 const btn = document.getElementById('thumbs-btn');
 const items = [];
-let queue = null, io = null, cur = 1, active = null, popBack = null;
+let handle = null, io = null, cur = 1, active = null, popBack = null;
 function want(it, on) {
   if (!it) return;
   it.want = on;
-  if (on && !it.canvas) { it.tries = 0; queue?.add(it); }
   if (!on) {
-    queue?.drop(it);
     if (it.canvas) { it.canvas.width = 0; it.canvas = null; it.box.replaceChildren(it.ph); }
+    return;
   }
+  if (it.canvas || it.busy || !handle) return;
+  it.busy = true;
+  const canvas = document.createElement('canvas');
+  handle.thumb(it.num, canvas, 72, cur)
+    .then(() => {
+      it.busy = false;
+      if (!it.want) { canvas.width = 0; return; }
+      it.canvas = canvas;
+      it.box.replaceChildren(canvas);
+    })
+    .catch(() => { it.busy = false; if (it.want && ++it.tries < 4) setTimeout(() => want(it, true), 400 * it.tries); });
 }
 function reveal(it) {
   const top = it.el.offsetTop, bot = top + it.el.offsetHeight;
@@ -27,28 +37,24 @@ export function updateThumbsActive(n) {
   active?.el.classList.add('active');
   if (active && !panel.hidden) reveal(active);
 }
-export function toggleThumbs(force) {
+export function toggleThumbs(force, save = true) {
   const show = force ?? panel.hidden;
   panel.hidden = !show;
   btn.classList.toggle('active', show);
+  if (save) setPref('thumbs', show);
   popBack?.();
   popBack = show ? pushBack(() => toggleThumbs(false)) : null;
   if (!show) return;
   updateThumbsActive(cur);
   for (let i = Math.max(0, cur - 3); i < Math.min(items.length, cur + 8); i++) want(items[i], true);
 }
-export function initThumbs(doc, handle, start = 1) {
+export function initThumbs(doc, h, start = 1) {
   destroyThumbs();
   if (!doc) return;
-  queue = createThumbQueue(doc, () => cur, (it, canvas) => {
-    if (!it.want) { canvas.width = 0; return; }
-    it.canvas = canvas;
-    it.box.replaceChildren(canvas);
-  });
+  handle = h;
   doc.getPage(1).then((p) => { const v = p.getViewport({ scale: 1 }); list.style.setProperty('--th', `${Math.round((72 * v.height) / v.width)}px`); });
   io = new IntersectionObserver((es) => {
-    if (panel.hidden) return;
-    es.forEach((x) => want(items[x.target.dataset.idx], x.isIntersecting));
+    if (!panel.hidden) es.forEach((x) => want(items[x.target.dataset.idx], x.isIntersecting));
   }, { root: list, rootMargin: '300px' });
   for (let i = 1; i <= doc.numPages; i++) {
     const el = document.createElement('div');
@@ -59,15 +65,17 @@ export function initThumbs(doc, handle, start = 1) {
     box.append(ph);
     el.append(box, Object.assign(document.createElement('span'), { className: 'thumb-num', textContent: i }));
     el.addEventListener('click', () => { handle?.goTo(i); updateThumbsActive(i); });
-    items.push({ num: i, el, box, ph, canvas: null, want: false, tries: 0 });
+    items.push({ num: i, el, box, ph, canvas: null, want: false, busy: false, tries: 0 });
     list.append(el);
     io.observe(el);
   }
   updateThumbsActive(start);
+  if (getPref('thumbs', false)) toggleThumbs(true, false);
 }
 export function destroyThumbs() {
-  queue?.destroy(); queue = null;
-  io?.disconnect(); io = null;
+  io?.disconnect();
+  io = null;
+  handle = null;
   items.length = 0;
   active = null;
   list.replaceChildren();
@@ -77,3 +85,4 @@ export function destroyThumbs() {
   popBack = null;
 }
 btn.addEventListener('click', () => toggleThumbs());
+document.getElementById('thumbs-close').addEventListener('click', () => toggleThumbs(false));

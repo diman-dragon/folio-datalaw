@@ -3,7 +3,7 @@ import { lineBoxes, normRects, textOf } from './sel-chars.js';
 import { paintSel, removeSel } from './sel-view.js';
 import { showMenu, hideMenu, onMenuAction } from './text-menu.js';
 import { addItem } from './annot-store.js';
-import { repaintPage } from './annot-layers.js';
+import { addNode } from './annot-layers.js';
 import { getDrawColor } from './viewer-draw.js';
 import { copyText } from './clipboard.js';
 import { pushBack } from './back.js';
@@ -22,27 +22,28 @@ export function clearSel() {
 export function placeMenu() {
   if (!S) return;
   if (!S.el.dataset.ready) { clearSel(); return; }
-  const pr = S.el.getBoundingClientRect(), b = scroller.getBoundingClientRect();
+  const pr = S.el.getBoundingClientRect(), b = scroller.getBoundingClientRect(), k = pr.width / S.T.w;
   const f = S.lines[0], l = S.lines.at(-1);
-  const anchor = { left: pr.left + Math.min(...S.lines.map((x) => x.x)), right: pr.left + Math.max(...S.lines.map((x) => x.x + x.w)), top: pr.top + f.y, bottom: pr.top + l.y + l.h };
+  const anchor = { left: pr.left + k * Math.min(...S.lines.map((x) => x.x)), right: pr.left + k * Math.max(...S.lines.map((x) => x.x + x.w)), top: pr.top + k * f.y, bottom: pr.top + k * (l.y + l.h) };
   if (anchor.bottom < b.top || anchor.top > b.bottom) hideMenu(); else showMenu(anchor, b);
 }
-export function select(el, chars, a, b, { menu = true } = {}) {
-  S = { el, chars, a, b, lines: lineBoxes(chars, a, b) };
+export function select(el, T, a, b, { menu = true } = {}) {
+  S = { el, T, a, b, lines: lineBoxes(T.chars, a, b) };
   popBack ??= pushBack(clearSel);
-  paintSel(el, S.lines);
+  paintSel(el, T, S.lines);
   if (menu) placeMenu(); else hideMenu();
 }
 // Marks a char range as highlight ('th') or underline ('tu') annotation.
-export function applyMark(kind, el, chars, a, b) {
+export function applyMark(kind, el, T, a, b) {
   const c = getDrawColor();
-  addItem(Number(el.dataset.i), { k: kind, c: kind === 'th' && c === '#1e293b' ? '#facc15' : c, r: normRects(lineBoxes(chars, a, b), el) });
-  repaintPage(el);
+  const item = { k: kind, c: kind === 'th' && c === '#1e293b' ? '#facc15' : c, r: normRects(lineBoxes(T.chars, a, b), T) };
+  addItem(Number(el.dataset.i), item);
+  addNode(el, item);
 }
 onMenuAction(async (act) => {
   if (!S) return;
-  const { el, chars, a, b } = S;
-  if (act === 'copy') { if (await copyText(textOf(chars, a, b))) toast(t('viewer.copied')); }
-  else applyMark(act === 'hl' ? 'th' : 'tu', el, chars, a, b);
+  const { el, T, a, b } = S;
+  if (act === 'copy') { if (await copyText(textOf(T.chars, a, b))) toast(t('viewer.copied')); }
+  else applyMark(act === 'hl' ? 'th' : 'tu', el, T, a, b);
   clearSel();
 });

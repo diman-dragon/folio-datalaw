@@ -7,7 +7,7 @@ import './ui/settings-screen.js';
 import './ui/home-screen.js';
 import './ui/viewer-night.js';
 import './ui/viewer-thumbs.js';
-import './ui/viewer-edit.js';
+import './ui/tools-panel.js';
 import './ui/viewer-undo.js';
 import './ui/text-gesture.js';
 import { toast } from './ui/toast.js';

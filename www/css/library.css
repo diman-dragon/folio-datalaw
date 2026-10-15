@@ -16,3 +16,10 @@
 .list .cover{width:46px;flex:none;border-radius:4px}
 .list .doc-info{min-width:0;flex:1}
 .list .doc-name{font-size:15px;-webkit-line-clamp:2}
+.shelf{margin-bottom:18px}
+.shelf h2{font-size:15px;font-weight:700;margin-bottom:10px}
+#shelf-list{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;scroll-snap-type:x proximity}
+#shelf-list::-webkit-scrollbar{display:none}
+#shelf-list .doc{flex:none;width:104px;scroll-snap-align:start}
+#shelf-list .doc-del{display:none}
+#shelf-list .doc-info{margin-top:7px}
