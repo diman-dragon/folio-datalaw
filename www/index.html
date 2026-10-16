@@ -79,7 +79,11 @@
       <button class="icon-btn" id="night-btn" data-i18n-aria="set.night"><svg><use href="img/icons.svg#moon"/></svg></button>
     </header>
     <div id="viewer-body">
-      <aside id="viewer-thumbs" class="viewer-thumbs" hidden><button class="thumbs-close" id="thumbs-close" data-i18n-aria="viewer.thumbsHide"><svg><use href="img/icons.svg#close"/></svg></button><div id="thumbs-list"></div></aside>
+      <button id="thumbs-tab" class="thumbs-tab" data-i18n-aria="viewer.thumbs" hidden><svg><use href="img/icons.svg#thumbnails"/></svg></button>
+      <aside id="viewer-thumbs" class="viewer-thumbs" hidden>
+        <div class="thumbs-bar"><button id="thumbs-pin" data-i18n-aria="viewer.thumbsPin"><svg><use href="img/icons.svg#pin"/></svg></button><button id="thumbs-close" data-i18n-aria="viewer.thumbsHide"><svg><use href="img/icons.svg#close"/></svg></button></div>
+        <div id="thumbs-list"></div>
+      </aside>
       <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
     </div>
     <div id="tools-panel" class="tools-panel" hidden>
@@ -93,6 +97,7 @@
         <button class="tp-btn" id="tp-pin" data-i18n-aria="viewer.pin"><svg><use href="img/icons.svg#pin"/></svg></button>
         <button class="tp-btn" id="tp-prev" data-i18n-aria="viewer.prev"><svg><use href="img/icons.svg#prev"/></svg></button>
         <button class="tp-btn" id="tp-next" data-i18n-aria="viewer.next"><svg><use href="img/icons.svg#next"/></svg></button>
+        <button class="tp-btn" id="tp-stylus" data-i18n-aria="edit.stylus"><svg><use href="img/icons.svg#stylus"/></svg></button>
         <button class="tp-btn" id="tp-hide" data-i18n-aria="viewer.hidePanel"><svg><use href="img/icons.svg#close"/></svg></button>
       </div>
       <div class="tp-colors">

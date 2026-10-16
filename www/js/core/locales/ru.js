@@ -51,4 +51,8 @@ export const ru = {
   'viewer.prev': 'Предыдущая страница',
   'viewer.next': 'Следующая страница',
   'home.pageOf': 'стр. {n} из {total}',
+  'edit.stylusOn': 'Рисует только стилус, пальцы листают',
+  'edit.stylusOff': 'Рисовать можно и пальцем',
+  'edit.stylus': 'Только стилус',
+  'viewer.thumbsPin': 'Закрепить миниатюры',
 };

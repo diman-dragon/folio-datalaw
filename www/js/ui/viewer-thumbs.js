@@ -1,9 +1,12 @@
-// Page thumbnails sidebar (transparent overlay, never moves the document): lazy list, tap to jump, shown or hidden (remembered).
+// Page thumbnails sidebar (transparent overlay, never moves the document): show / hide, pin = shown in every document.
 import { pushBack } from './back.js';
 import { getPref, setPref } from '../core/prefs.js';
 const panel = document.getElementById('viewer-thumbs');
 const list = document.getElementById('thumbs-list');
 const btn = document.getElementById('thumbs-btn');
+const tab = document.getElementById('thumbs-tab');
+const pinBtn = document.getElementById('thumbs-pin');
+let pinned = getPref('thumbspin', false);
 const items = [];
 let handle = null, io = null, cur = 1, active = null, popBack = null;
 function want(it, on) {
@@ -37,11 +40,11 @@ export function updateThumbsActive(n) {
   active?.el.classList.add('active');
   if (active && !panel.hidden) reveal(active);
 }
-export function toggleThumbs(force, save = true) {
+export function toggleThumbs(force) {
   const show = force ?? panel.hidden;
   panel.hidden = !show;
+  tab.hidden = show || !items.length;
   btn.classList.toggle('active', show);
-  if (save) setPref('thumbs', show);
   popBack?.();
   popBack = show ? pushBack(() => toggleThumbs(false)) : null;
   if (!show) return;
@@ -70,7 +73,7 @@ export function initThumbs(doc, h, start = 1) {
     io.observe(el);
   }
   updateThumbsActive(start);
-  if (getPref('thumbs', false)) toggleThumbs(true, false);
+  if (pinned) toggleThumbs(true); else tab.hidden = false;
 }
 export function destroyThumbs() {
   io?.disconnect();
@@ -80,9 +83,19 @@ export function destroyThumbs() {
   active = null;
   list.replaceChildren();
   panel.hidden = true;
+  tab.hidden = true;
   btn.classList.remove('active');
   popBack?.();
   popBack = null;
 }
 btn.addEventListener('click', () => toggleThumbs());
+tab.addEventListener('click', () => toggleThumbs(true));
 document.getElementById('thumbs-close').addEventListener('click', () => toggleThumbs(false));
+const paintPin = () => pinBtn.classList.toggle('on', pinned);
+pinBtn.addEventListener('click', () => { pinned = !pinned; setPref('thumbspin', pinned); paintPin(); });
+paintPin();
+// A page that was just drawn is the cheapest thumbnail there is.
+document.getElementById('viewer-pages').addEventListener('pageready', (e) => {
+  const it = items[e.detail.i];
+  if (it && !panel.hidden && !it.canvas) want(it, true);
+});

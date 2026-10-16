@@ -1,10 +1,17 @@
 // Text geometry of a page straight from pdf.js text content (no DOM): every char box in page units (scale 1, y down).
 const cache = new WeakMap();
+const widths = new Map();
+const ctx2 = document.createElement('canvas').getContext('2d');
+function charW(family, ch) {
+  const k = `${family}|${ch}`;
+  let w = widths.get(k);
+  if (w === undefined) { ctx2.font = `100px ${family}`; w = ctx2.measureText(ch).width; widths.set(k, w); }
+  return w;
+}
 const mul = (m, t) => [m[0] * t[0] + m[2] * t[1], m[1] * t[0] + m[3] * t[1], m[0] * t[2] + m[2] * t[3], m[1] * t[2] + m[3] * t[3], m[0] * t[4] + m[2] * t[5] + m[4], m[1] * t[4] + m[3] * t[5] + m[5]];
 async function build(page) {
   const vp = page.getViewport({ scale: 1 });
   const { items, styles } = await page.getTextContent();
-  const ctx = document.createElement('canvas').getContext('2d');
   const chars = [];
   for (const it of items) {
     if (!it.str) continue;
@@ -13,8 +20,7 @@ async function build(page) {
     if (!fh || !len) continue;
     const st = styles[it.fontName] ?? {};
     const asc = st.ascent ?? 0.88, desc = st.descent ?? -0.22;
-    ctx.font = `100px ${st.fontFamily || 'sans-serif'}`;
-    const ws = [...it.str].map((ch) => ctx.measureText(ch).width);
+    const ws = [...it.str].map((ch) => charW(st.fontFamily || 'sans-serif', ch));
     const sum = ws.reduce((x, y) => x + y, 0);
     const total = it.width;
     const ux = a / len, uy = b / len, vx = c / fh, vy = d / fh;

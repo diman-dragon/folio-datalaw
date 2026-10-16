@@ -6,6 +6,7 @@ export async function openPdf(blob, { askPassword = true } = {}) {
   const data = new Uint8Array(await blob.arrayBuffer());
   const task = lib.getDocument({
     data,
+    enableHWA: true, // GPU-backed canvases (the default software canvases are several times slower on phones)
     cMapUrl: ASSETS + 'cmaps/', cMapPacked: true,
     standardFontDataUrl: ASSETS + 'standard_fonts/',
     wasmUrl: ASSETS + 'wasm/', iccUrl: ASSETS + 'iccs/',

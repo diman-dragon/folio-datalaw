@@ -1,12 +1,13 @@
 // Active tool / colour state and the freehand tools (pen, marker, eraser) drawn as vector paths.
 import { ensureLayers } from './annot-layers.js';
 import { addItem, recordErase } from './annot-store.js';
-import { svgNode, register, HL } from './annot-svg.js';
+import { svgNode, register, outlineD, HL } from './annot-svg.js';
 import { eraseSegment } from './annot-erase.js';
+import { stylusOnly, penSeen } from './stylus.js';
 import { emit } from '../core/bus.js';
 const pages = document.getElementById('viewer-pages');
 const root = document.getElementById('viewer');
-const WIDTH = { pen: 2.6, highlighter: 20, eraser: 14 };
+const WIDTH = { pen: 2.8, highlighter: 20, eraser: 14 };
 const KIND = { pen: 'pen', highlighter: 'hl', eraser: 'er' };
 let tool = null, color = '#2563eb', g = null;
 export const getDrawTool = () => tool;
@@ -20,22 +21,32 @@ export function setDrawTool(next) {
   emit('toolchange', next);
 }
 const norm = (v) => Math.round(Math.min(1, Math.max(0, v)) * 10000) / 10000;
-const point = (e) => [norm((e.clientX - g.r.left) / g.r.width), norm((e.clientY - g.r.top) / g.r.height)];
+// Pen pressure is smoothed a little so the line width does not flicker.
+function point(e) {
+  g.p = g.p === undefined ? e.pressure : g.p * 0.6 + e.pressure * 0.4;
+  return [norm((e.clientX - g.r.left) / g.r.width), norm((e.clientY - g.r.top) / g.r.height), Math.round(g.p * 100) / 100];
+}
 function down(e) {
-  if (g && e.pointerId !== g.pid) { abort(); return; }
+  const pen = e.pointerType === 'pen';
+  if (pen) penSeen();
+  if (g && e.pointerId !== g.pid) {
+    if (g.pen) return; // palm or finger while the pen is drawing: ignored
+    if (pen) drop(); else { abort(); return; } // the pen always wins over a touch stroke
+  }
   const el = e.target.closest?.('.pdf-page');
-  if (!KIND[tool] || !e.isPrimary || !el?.dataset.ready) return;
+  const kind = pen && e.buttons & 32 ? 'eraser' : tool; // eraser end / barrel button of the pen
+  if (!KIND[kind] || !(e.isPrimary || pen) || !el?.dataset.ready || (!pen && stylusOnly())) return;
   e.preventDefault();
   const { mark, ink, R } = ensureLayers(el);
   const r = el.getBoundingClientRect();
-  g = { pid: e.pointerId, el, r, R, k: tool, w: WIDTH[tool] / r.width, pts: [], n: 1, raf: 0, removed: [], i: Number(el.dataset.i) };
+  g = { pid: e.pointerId, pen, v: pen && kind === 'pen', el, r, R, k: kind, w: WIDTH[kind] / r.width, pts: [], n: 1, raf: 0, removed: [], i: Number(el.dataset.i) };
   g.pts.push(point(e));
-  if (tool !== 'eraser') {
-    const hl = tool === 'highlighter';
-    g.node = svgNode('path', { fill: 'none', stroke: color, 'stroke-width': g.w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', ...(hl ? { 'stroke-opacity': HL } : {}) });
+  if (kind !== 'eraser') {
+    const hl = kind === 'highlighter';
+    g.node = svgNode('path', g.v ? { fill: color, stroke: 'none' } : { fill: 'none', stroke: color, 'stroke-width': g.w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', ...(hl ? { 'stroke-opacity': HL } : {}) });
     (hl ? mark : ink).append(g.node);
     g.d = `M${g.pts[0][0]} ${g.pts[0][1] * R}`;
-    g.node.setAttribute('d', `${g.d}L${g.pts[0][0] + 0.0001} ${g.pts[0][1] * R}`);
+    g.node.setAttribute('d', g.v ? outlineD(g.pts, R, g.w) : `${g.d}L${g.pts[0][0] + 0.0001} ${g.pts[0][1] * R}`);
   }
   try { pages.setPointerCapture(e.pointerId); } catch { /* ignore */ }
 }
@@ -45,9 +56,10 @@ function flush() {
   for (; g.n < g.pts.length; g.n++) {
     const c = g.pts[g.n - 1], p = g.pts[g.n];
     if (g.k === 'eraser') g.removed.push(...eraseSegment(g.i, c, p, g.R, g.w));
-    else g.d += `Q${c[0]} ${c[1] * g.R} ${(c[0] + p[0]) / 2} ${((c[1] + p[1]) / 2) * g.R}`;
+    else if (!g.v) g.d += `Q${c[0]} ${c[1] * g.R} ${(c[0] + p[0]) / 2} ${((c[1] + p[1]) / 2) * g.R}`;
   }
-  if (g.node) g.node.setAttribute('d', `${g.d}L${g.pts.at(-1)[0]} ${g.pts.at(-1)[1] * g.R}`);
+  if (g.v) g.node.setAttribute('d', outlineD(g.pts, g.R, g.w));
+  else if (g.node) g.node.setAttribute('d', `${g.d}L${g.pts.at(-1)[0]} ${g.pts.at(-1)[1] * g.R}`);
 }
 function move(e) {
   if (!g || e.pointerId !== g.pid) return;
@@ -63,10 +75,18 @@ function finish() {
   flush();
   if (g.k === 'eraser') recordErase(g.removed);
   else {
-    const item = { k: KIND[g.k], c: color, w: Math.round(g.w * 1e5) / 1e5, p: g.pts };
+    const item = { k: KIND[g.k], c: color, w: Math.round(g.w * 1e5) / 1e5, p: g.pts, ...(g.v ? { v: 1 } : {}) };
     register(item, g.node);
     addItem(g.i, item);
   }
+  g = null;
+}
+// Drops a stroke started by a touch (a palm) when the pen arrives.
+function drop() {
+  if (!g) return;
+  cancelAnimationFrame(g.raf);
+  if (g.k === 'eraser') recordErase(g.removed);
+  g.node?.remove();
   g = null;
 }
 // A second finger means pinch / pan, not drawing: drop a barely started stroke, keep a real one.
@@ -81,5 +101,6 @@ function abort() {
 const up = (e) => { if (g && e.pointerId === g.pid) finish(); };
 pages.addEventListener('pointerdown', down, { passive: false });
 pages.addEventListener('pointermove', move, { passive: false });
+pages.addEventListener('pointermove', (e) => { if (e.pointerType === 'pen') penSeen(); }, { passive: true });
 pages.addEventListener('pointerup', up);
 pages.addEventListener('pointercancel', up);

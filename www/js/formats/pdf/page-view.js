@@ -1,7 +1,6 @@
 // One page's canvases: a base canvas (whole page, size-capped) plus a detail canvas (visible window) while zoomed in.
-import { renderPage } from './render-page.js';
+import { renderPage, baseCap, detailCap } from './render-page.js';
 import { enqueue, cancel } from './render-queue.js';
-const CAP = 3_000_000;
 const dpr = () => Math.min(window.devicePixelRatio || 1, 2);
 const canvas = (cls) => Object.assign(document.createElement('canvas'), { className: cls });
 const fire = (e, name) => e.el.dispatchEvent(new CustomEvent(name, { bubbles: true, detail: { i: e.i } }));
@@ -19,7 +18,7 @@ export function createViews({ doc, lay }) {
         const v = page.getViewport({ scale: 1 });
         if (Math.abs(e.ratio - v.height / v.width) > 0.001) { e.ratio = v.height / v.width; lay.place(e); lay.measure(); }
         const c = canvas('pv pv-base');
-        ctl.task = renderPage(page, c, lay.widthOf(e), { maxPx: CAP });
+        ctl.task = renderPage(page, c, lay.widthOf(e), { maxPx: baseCap() });
         await ctl.task.promise;
         if (ctl.dead || !e.mounted) return;
         e.base?.remove();
@@ -34,7 +33,7 @@ export function createViews({ doc, lay }) {
   // Draws the visible window of a zoomed page at full resolution (the base canvas is size-capped).
   function detail(e, view, prio) {
     const w = lay.widthOf(e), d = dpr();
-    if (w * w * e.ratio * d * d <= CAP) { if (e.detail) clearDetail(e); return; }
+    if (w * w * e.ratio * d * d <= baseCap()) { if (e.detail) clearDetail(e); return; }
     const r = e.el.getBoundingClientRect();
     const box = (m) => [Math.max(0, view.left - m * view.width - r.left), Math.max(0, view.top - m * view.height - r.top), Math.min(r.width, view.right + m * view.width - r.left), Math.min(r.height, view.bottom + m * view.height - r.top)];
     const [vx0, vy0, vx1, vy1] = box(0), [x0, y0, x1, y1] = box(0.3);
@@ -45,7 +44,7 @@ export function createViews({ doc, lay }) {
       const page = await pageOf(e);
       if (ctl.dead) return;
       const cv = canvas('pv pv-detail');
-      ctl.task = renderPage(page, cv, w, { maxPx: CAP, rect: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } });
+      ctl.task = renderPage(page, cv, w, { maxPx: detailCap(), rect: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } });
       await ctl.task.promise;
       if (ctl.dead || !e.mounted || !e.base) return;
       cv.style.cssText = `left:${(x0 / w) * 100}%;top:${(y0 / (w * e.ratio)) * 100}%;width:${((x1 - x0) / w) * 100}%;height:${((y1 - y0) / (w * e.ratio)) * 100}%`;

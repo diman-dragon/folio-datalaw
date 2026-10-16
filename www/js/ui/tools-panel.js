@@ -6,6 +6,7 @@ import { toast } from './toast.js';
 import { t } from '../core/i18n.js';
 import { on, emit } from '../core/bus.js';
 import { getPref, setPref } from '../core/prefs.js';
+import { stylusOnly, setStylusOnly } from './stylus.js';
 const panel = document.getElementById('tools-panel');
 const editBtn = document.getElementById('edit-btn');
 const tools = [...panel.querySelectorAll('[data-tool]')];
@@ -41,4 +42,9 @@ const flip = (d) => getActiveHandle()?.goTo(Math.min(total, Math.max(1, page + d
 document.getElementById('tp-prev').addEventListener('click', () => flip(-1));
 document.getElementById('tp-next').addEventListener('click', () => flip(1));
 on('pagechange', (p) => { page = p.n; total = p.total; });
+const penBtn = document.getElementById('tp-stylus');
+const paintPen = () => penBtn.classList.toggle('on', stylusOnly());
+penBtn.addEventListener('click', () => { setStylusOnly(!stylusOnly()); toast(t(stylusOnly() ? 'edit.stylusOn' : 'edit.stylusOff')); });
+on('stylus', paintPen);
 paintPin();
+paintPen();

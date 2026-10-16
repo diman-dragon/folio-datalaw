@@ -8,6 +8,7 @@ import './ui/home-screen.js';
 import './ui/viewer-night.js';
 import './ui/viewer-thumbs.js';
 import './ui/tools-panel.js';
+import './ui/finger-pan.js';
 import './ui/viewer-undo.js';
 import './ui/text-gesture.js';
 import { toast } from './ui/toast.js';

@@ -51,4 +51,8 @@ export const en = {
   'viewer.prev': 'Previous page',
   'viewer.next': 'Next page',
   'home.pageOf': 'page {n} of {total}',
+  'edit.stylusOn': 'Only the stylus draws, fingers scroll',
+  'edit.stylusOff': 'Fingers can draw too',
+  'edit.stylus': 'Stylus only',
+  'viewer.thumbsPin': 'Pin thumbnails',
 };
