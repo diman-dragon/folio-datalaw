@@ -27,10 +27,12 @@ export async function toggleOcr(force) {
   sheet.hidden = !(force ?? sheet.hidden);
   if (!sheet.hidden) { await paintChips(); if (!(await ocrInfo())) toast(t('ocr.missing')); }
 }
+const errBox = $('ocr-error');
+function showError(msg) { errBox.textContent = msg; errBox.hidden = false; }
 async function start(pages) {
   const h = getActiveHandle(), doc = getActiveDoc();
   if (busy || !h || !doc) return;
-  busy = true; stop = false; run.hidden = false;
+  busy = true; stop = false; run.hidden = false; errBox.hidden = true;
   const fill = $('ocr-fill'), status = $('ocr-status');
   try {
     const done = await recognizePages(h, doc.id, pages, langs, {
@@ -38,7 +40,11 @@ async function start(pages) {
       onPage: (i, n, p) => { fill.style.width = `${((i - 1 + p) / n) * 100}%`; status.textContent = t('ocr.progress').replace('{i}', i).replace('{n}', n).replace('{p}', Math.round(p * 100)); },
     });
     if (!stop) { toast(t(done ? 'ocr.done' : 'ocr.nothing')); sheet.hidden = true; }
-  } catch (err) { toast(t(err.message === 'ocr-missing' || err.message === 'ocr-lang' ? 'ocr.missing' : 'ocr.fail')); }
+  } catch (err) {
+    console.error('OCR failed', err);
+    const missing = err.message === 'ocr-missing' || err.message === 'ocr-lang';
+    showError(missing ? t('ocr.missing') : `${t('ocr.fail')}: ${String(err?.message ?? err).slice(0, 300)}`);
+  }
   busy = false; run.hidden = true;
 }
 $('ocr-page').addEventListener('click', () => start([page - 1]));

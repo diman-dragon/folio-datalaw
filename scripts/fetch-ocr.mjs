@@ -28,7 +28,7 @@ try {
     try { copyLang(unpack(`@tesseract.js-data/${code}`), code, out); langs.push(code); } catch (err) { console.warn(`OCR language ${code} skipped: ${err.message}`); }
   }
   if (!langs.length) throw new Error('no language data');
-  fs.writeFileSync(`${out}/ready.json`, JSON.stringify({ engine: 5, langs }));
+  fs.writeFileSync(`${out}/ready.json`, JSON.stringify({ engine: 5, langs, core: fs.readdirSync(`${out}/core`) }));
   console.log('OCR vendored:', langs.join(', '));
 } catch (err) {
   fs.rmSync(out, { recursive: true, force: true });

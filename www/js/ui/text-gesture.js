@@ -17,7 +17,7 @@ function cancelPress() { clearTimeout(press?.timer); clearTimeout(press?.warm); 
 async function fire(p) {
   const T = await (p.job ??= pageText(p.el));
   if (press !== p || !T) return;
-  if (!T.chars.length) { toast(t('ocr.noText')); return; } // scanned page: it needs recognition first
+  if (T.chars.length < 20) { toast(t('ocr.noText')); return; } // scanned page: it needs recognition first
   const h = hit(p.el, T, p.x, p.y);
   if (h.i < 0 || h.css > REACH) return;
   p.fired = true;

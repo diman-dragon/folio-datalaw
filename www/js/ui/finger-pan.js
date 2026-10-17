@@ -5,7 +5,7 @@ import { getActiveHandle } from './viewer-handle.js';
 import { getReadMode } from '../core/readmode.js';
 import { on } from '../core/bus.js';
 const scroller = document.getElementById('viewer-scroll');
-let g = null, fling = 0, page = 1;
+let g = null, fling = 0, page = 1, penDown = false;
 on('pagechange', (p) => { page = p.n; });
 const stop = () => { cancelAnimationFrame(fling); fling = 0; };
 function glide(vx, vy) {
@@ -15,7 +15,8 @@ function glide(vx, vy) {
   fling = requestAnimationFrame(() => glide(vx * 0.94, vy * 0.94));
 }
 scroller.addEventListener('pointerdown', (e) => {
-  if (e.pointerType !== 'touch' || !stylusOnly() || !getDrawTool()) return;
+  if (e.pointerType === 'pen') penDown = true; // a palm next to a drawing pen never scrolls
+  if (e.pointerType !== 'touch' || penDown || !stylusOnly() || !getDrawTool()) return;
   stop();
   if (g) { g = null; return; }
   g = { pid: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t: performance.now(), vx: 0, vy: 0, from: page };
@@ -39,5 +40,6 @@ function end(e) {
     getActiveHandle()?.goTo(d.from + (flip ? (dx < 0 ? 1 : -1) : 0), true);
   } else glide(d.vx, d.vy);
 }
-scroller.addEventListener('pointerup', end);
-scroller.addEventListener('pointercancel', end);
+const penUp = (e) => { if (e.pointerType === 'pen') penDown = false; };
+scroller.addEventListener('pointerup', (e) => { penUp(e); end(e); });
+scroller.addEventListener('pointercancel', (e) => { penUp(e); end(e); });

@@ -6,7 +6,7 @@ export function attachDoubleTap({ scroller, zoom }) {
     sx = e.touches[0].clientX; sy = e.touches[0].clientY;
   };
   const end = (e) => {
-    if (e.touches.length || e.changedTouches.length !== 1 || scroller.closest('.draw-active')) return;
+    if (e.touches.length || e.changedTouches.length !== 1 || e.changedTouches[0].touchType === 'stylus' || scroller.closest('.draw-active')) return;
     const { clientX: x, clientY: y } = e.changedTouches[0];
     if (Math.hypot(x - sx, y - sy) > 10) { last = 0; return; }
     const now = Date.now();

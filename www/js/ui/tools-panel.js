@@ -54,7 +54,7 @@ document.getElementById('tp-prev').addEventListener('click', () => flip(-1));
 document.getElementById('tp-next').addEventListener('click', () => flip(1));
 on('pagechange', (p) => { page = p.n; total = p.total; });
 const penBtn = document.getElementById('tp-stylus');
-const paintPen = () => penBtn.classList.toggle('on', stylusOnly());
+const paintPen = () => { penBtn.classList.toggle('on', stylusOnly()); penBtn.setAttribute('aria-pressed', stylusOnly()); };
 penBtn.addEventListener('click', () => { setStylusOnly(!stylusOnly()); toast(t(stylusOnly() ? 'edit.stylusOn' : 'edit.stylusOff')); });
 on('stylus', paintPen);
 paintPin();

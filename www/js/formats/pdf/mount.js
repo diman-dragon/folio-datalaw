@@ -8,6 +8,7 @@ import { getPageText } from './page-chars.js';
 import { renderThumb } from './thumb.js';
 import { renderForOcr } from './ocr-source.js';
 import { ocrText } from '../../core/ocr-geom.js';
+const TEXT_MIN = 20; // fewer chars than this (page numbers, stamps) does not make a page "text"
 export async function mountPdf({ container, scroller, blob, startPage = 1, mode = 'scroll', onPage }) {
   const doc = await openPdf(blob);
   let cur = startPage, curMode = mode;
@@ -43,9 +44,9 @@ export async function mountPdf({ container, scroller, blob, startPage = 1, mode 
     // Native text first; a page without text uses its recognized layer.
     getText: async (i) => {
       const T = await doc.getPage(i + 1).then(getPageText);
-      return T.chars.length || !ocr.has(i) ? T : ocrText(ocr.get(i));
+      return T.chars.length >= TEXT_MIN || !ocr.has(i) ? T : ocrText(ocr.get(i));
     },
-    hasText: async (i) => ocr.has(i) || (await doc.getPage(i + 1).then(getPageText)).chars.length > 0,
+    hasText: async (i) => ocr.has(i) || (await doc.getPage(i + 1).then(getPageText)).chars.length >= TEXT_MIN,
     setOcr: (i, data) => ocr.set(i, data),
     renderForOcr: (i) => renderForOcr(doc, i + 1),
     thumb: (n, canvas, w, near) => renderThumb(list, doc, n, canvas, w, near),

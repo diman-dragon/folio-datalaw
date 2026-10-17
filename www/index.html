@@ -89,7 +89,7 @@
       <div id="viewer-scroll"><div id="viewer-status" class="viewer-msg" hidden></div><div id="viewer-pages"></div></div>
     </div>
     <div id="tools-panel" class="tools-panel" hidden>
-      <div class="tp-grip"><i></i></div>
+      <div class="tp-head"><div class="tp-grip"><i></i></div><button class="tp-close" id="tp-hide" data-i18n-aria="viewer.hidePanel"><svg><use href="img/icons.svg#close"/></svg></button></div>
       <div class="tp-grid">
         <button class="tp-btn" data-tool="pen" data-i18n-aria="edit.pen"><svg><use href="img/icons.svg#pen"/></svg></button>
         <button class="tp-btn" data-tool="eraser" data-i18n-aria="edit.eraser"><svg><use href="img/icons.svg#eraser"/></svg></button>
@@ -101,7 +101,6 @@
         <button class="tp-btn" id="tp-next" data-i18n-aria="viewer.next"><svg><use href="img/icons.svg#next"/></svg></button>
         <button class="tp-btn" id="tp-stylus" data-i18n-aria="edit.stylus"><svg><use href="img/icons.svg#stylus"/></svg></button>
         <button class="tp-btn" id="tp-ocr" data-i18n-aria="ocr.btn"><svg><use href="img/icons.svg#ocr"/></svg></button>
-        <button class="tp-btn" id="tp-hide" data-i18n-aria="viewer.hidePanel"><svg><use href="img/icons.svg#close"/></svg></button>
       </div>
       <div class="tp-colors">
         <button class="color-dot active" data-color="#2563eb" style="--c:#2563eb" data-i18n-aria="color.blue"></button>
@@ -127,6 +126,7 @@
         <button id="ocr-all" data-i18n="ocr.all"></button>
         <button id="ocr-close" data-i18n-aria="viewer.hidePanel"><svg><use href="img/icons.svg#close"/></svg></button>
       </div>
+      <div class="ocr-error" id="ocr-error" hidden></div>
       <div class="ocr-run" id="ocr-run" hidden><div class="ocr-bar"><i id="ocr-fill"></i></div><span id="ocr-status"></span><button id="ocr-cancel" data-i18n="ocr.cancel"></button></div>
     </div>
     <div id="text-menu" class="text-bubble-menu" hidden>
