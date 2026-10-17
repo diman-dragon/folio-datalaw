@@ -5,6 +5,7 @@ import './formats/index.js';
 import './ui/tabs.js';
 import './ui/settings-screen.js';
 import './ui/home-screen.js';
+import './ui/home-images.js';
 import './ui/viewer-night.js';
 import './ui/viewer-thumbs.js';
 import './ui/tools-panel.js';

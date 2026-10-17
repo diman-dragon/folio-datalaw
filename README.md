@@ -50,3 +50,8 @@ formats/pdf/            pdfjs, open-doc, render-page, page-list, page-tracker, z
 
 ## Папка библиотеки
 Нативный плагин `android/.../FolderPlugin.java` (Storage Access Framework): `pick`, `list`, `stage`. Права на папку сохраняются между запусками. В браузере (`npm run dev`) выбор папки недоступен.
+
+## Распознавание текста (OCR) и картинки в PDF
+
+- OCR работает офлайн: `npm install` (скрипт `postinstall`) скачивает tesseract.js 5, ядро и данные языков (rus, eng, ita, srp, srp_latn) в `www/vendor/tesseract` (папка в `.gitignore`). Для повторной загрузки: `npm run fetch-ocr`. Нужен интернет и утилита `tar`; без них приложение собирается и работает, но кнопка распознавания сообщает, что модуль не установлен. Размер APK растёт примерно на 40-60 МБ.
+- Кнопка «Картинки в PDF» (библиотека) собирает PDF без внешних библиотек (`data/pdf-writer.js`).

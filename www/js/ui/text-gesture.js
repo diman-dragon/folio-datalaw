@@ -1,27 +1,23 @@
 // Touch gestures on page text: long press selects a word, handles extend it, text tools mark by dragging.
-import { getActiveHandle } from './viewer-handle.js';
 import { lineBoxes } from './sel-chars.js';
-import { hitChar, wordAt } from './sel-hit.js';
+import { wordAt } from './sel-hit.js';
+import { pageText, hit } from './page-hit.js';
 import { handleSide, paintSel, removeSel } from './sel-view.js';
 import { getSel, select, clearSel, placeMenu, applyMark } from './text-select.js';
 import { getDrawTool } from './viewer-draw.js';
 import { hideMenu } from './text-menu.js';
+import { toast } from './toast.js';
+import { t } from '../core/i18n.js';
 import { on } from '../core/bus.js';
 const pages = document.getElementById('viewer-pages');
 const scroller = document.getElementById('viewer-scroll');
 const LONG = 420, SLOP = 10, REACH = 30;
 let press = null, drag = null;
-const textOf = (el) => getActiveHandle()?.getText?.(Number(el.dataset.i)).catch(() => null) ?? Promise.resolve(null);
-// Screen point -> page units; k = page units per css px.
-function local(el, T, x, y) {
-  const r = el.getBoundingClientRect(), k = T.w / r.width;
-  return { x: (x - r.left) * k, y: (y - r.top) * k, k };
-}
-const hit = (el, T, x, y) => { const p = local(el, T, x, y), h = hitChar(T.chars, p.x, p.y); return { i: h.i, css: h.dist / p.k }; };
 function cancelPress() { clearTimeout(press?.timer); clearTimeout(press?.warm); press = null; }
 async function fire(p) {
-  const T = await (p.job ??= textOf(p.el));
-  if (press !== p || !T?.chars.length) return;
+  const T = await (p.job ??= pageText(p.el));
+  if (press !== p || !T) return;
+  if (!T.chars.length) { toast(t('ocr.noText')); return; } // scanned page: it needs recognition first
   const h = hit(p.el, T, p.x, p.y);
   if (h.i < 0 || h.css > REACH) return;
   p.fired = true;
@@ -34,7 +30,7 @@ function startPress(e) {
   if (!el?.dataset.ready || getDrawTool()) return;
   cancelPress();
   press = { el, x: e.clientX, y: e.clientY, pid: e.pointerId, fired: false, job: null };
-  press.warm = setTimeout((p) => { p.job = textOf(p.el); }, 160, press); // text geometry is built only if the finger stays down
+  press.warm = setTimeout((p) => { p.job = pageText(p.el); }, 160, press); // text geometry is built only if the finger stays down
   press.timer = setTimeout(fire, LONG, press);
 }
 // A drag is either a selection handle (extends the selection) or a text tool (marks the range on release).
@@ -61,7 +57,7 @@ function startMark(e, tool) {
   clearSel();
   const d = startDrag('mark', e, { el, tool });
   const pt = [e.clientX, e.clientY];
-  d.ready = textOf(el).then((T) => {
+  d.ready = pageText(el).then((T) => {
     d.T = T;
     if (!T) return;
     const h = hit(el, T, ...pt);

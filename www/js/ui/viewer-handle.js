@@ -2,3 +2,6 @@
 let handle = null;
 export const setActiveHandle = (h) => { handle = h; };
 export const getActiveHandle = () => handle;
+let doc = null;
+export const setActiveDoc = (d) => { doc = d; };
+export const getActiveDoc = () => doc;

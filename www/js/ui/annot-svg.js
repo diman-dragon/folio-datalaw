@@ -54,7 +54,7 @@ export function buildNode(item, R) {
     n = svgNode('path', { d: item.r.map(([x, y, w, h]) => `M${f(x)} ${f(y * R)}h${f(w)}v${f(h * R)}h${f(-w)}z`).join(''), fill: item.c, 'fill-opacity': HL });
   } else {
     const lw = Math.max(0.003, item.r[0][3] * R * 0.08);
-    n = svgNode('path', { d: item.r.map(([x, y, w, h]) => `M${f(x)} ${f((y + h) * R - lw * 1.3)}h${f(w)}`).join(''), fill: 'none', stroke: item.c, 'stroke-width': f(lw), 'stroke-linecap': 'round' });
+    n = svgNode('path', { d: item.r.map(([x, y, w, h]) => `M${f(x)} ${f((y + h) * R - lw * 0.55)}h${f(w)}`).join(''), fill: 'none', stroke: item.c, 'stroke-width': f(lw), 'stroke-linecap': 'round' });
   }
   nodes.set(item, n);
   return n;

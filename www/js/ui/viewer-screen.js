@@ -7,7 +7,8 @@ import { initThumbs, updateThumbsActive, destroyThumbs } from './viewer-thumbs.j
 import { suspendPanel, restorePanel } from './tools-panel.js';
 import { startAwake, stopAwake } from '../core/awake.js';
 import { emit } from '../core/bus.js';
-import { setActiveHandle } from './viewer-handle.js';
+import { setActiveHandle, setActiveDoc } from './viewer-handle.js';
+import { loadAllOcr } from '../data/ocr-store.js';
 import { clearAnnots } from './annot-store.js';
 import { clearSel } from './text-select.js';
 import { t } from '../core/i18n.js';
@@ -34,6 +35,8 @@ export function closeViewer() {
   handle = null;
   setHandle(null);
   setActiveHandle(null);
+  setActiveDoc(null);
+  emit('viewerclose');
   clearSel();
   clearAnnots();
   destroyThumbs();
@@ -59,6 +62,8 @@ export async function openViewer(meta, blob) {
     handle = h;
     setHandle(h);
     setActiveHandle(h);
+    setActiveDoc(meta);
+    loadAllOcr(meta.id).then((list) => list.forEach(([i, d]) => h.setOcr(i, d))).catch(() => {});
     initThumbs(h.doc, h, meta.lastPage ?? 1);
     restorePanel();
     startAwake();

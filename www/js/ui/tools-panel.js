@@ -7,10 +7,12 @@ import { t } from '../core/i18n.js';
 import { on, emit } from '../core/bus.js';
 import { getPref, setPref } from '../core/prefs.js';
 import { stylusOnly, setStylusOnly } from './stylus.js';
+import { toggleOcr } from './ocr-menu.js';
 const panel = document.getElementById('tools-panel');
 const editBtn = document.getElementById('edit-btn');
 const tools = [...panel.querySelectorAll('[data-tool]')];
-const dots = panel.querySelectorAll('.color-dot');
+const dots = panel.querySelectorAll('.color-dot[data-color]');
+const custom = document.getElementById('tp-custom');
 let pinned = getPref('panelpinned', false), tool = null, page = 1, total = 1;
 const place = initPanelDrag(panel, () => pinned);
 function pick(next) {
@@ -34,10 +36,19 @@ const pinBtn = document.getElementById('tp-pin');
 const paintPin = () => { pinBtn.classList.toggle('on', pinned); panel.classList.toggle('pinned', pinned); };
 pinBtn.addEventListener('click', () => { pinned = !pinned; setPref('panelpinned', pinned); paintPin(); });
 tools.forEach((b) => b.addEventListener('click', () => pick(tool === b.dataset.tool ? null : b.dataset.tool)));
-dots.forEach((d) => d.addEventListener('click', () => {
-  dots.forEach((x) => x.classList.toggle('active', x === d));
-  setDrawColor(d.dataset.color);
-}));
+const customDot = custom.parentElement;
+function setColor(c, from) {
+  dots.forEach((x) => x.classList.toggle('active', x === from));
+  customDot.classList.toggle('active', from === customDot);
+  setDrawColor(c);
+  setPref('color', c);
+}
+dots.forEach((d) => d.addEventListener('click', () => setColor(d.dataset.color, d)));
+custom.addEventListener('input', () => { customDot.style.setProperty('--c', custom.value); setColor(custom.value, customDot); });
+const saved = getPref('color', null);
+const found = [...dots].find((d) => d.dataset.color === saved);
+if (saved && found) setColor(saved, found); else if (saved) { custom.value = saved; customDot.style.setProperty('--c', saved); setColor(saved, customDot); }
+document.getElementById('tp-ocr').addEventListener('click', () => toggleOcr());
 const flip = (d) => getActiveHandle()?.goTo(Math.min(total, Math.max(1, page + d)), true);
 document.getElementById('tp-prev').addEventListener('click', () => flip(-1));
 document.getElementById('tp-next').addEventListener('click', () => flip(1));

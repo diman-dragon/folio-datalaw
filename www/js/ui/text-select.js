@@ -36,7 +36,7 @@ export function select(el, T, a, b, { menu = true } = {}) {
 // Marks a char range as highlight ('th') or underline ('tu') annotation.
 export function applyMark(kind, el, T, a, b) {
   const c = getDrawColor();
-  const item = { k: kind, c: kind === 'th' && c === '#1e293b' ? '#facc15' : c, r: normRects(lineBoxes(T.chars, a, b), T) };
+  const item = { k: kind, c: kind === 'th' && ['#1e293b', '#ffffff', '#6b7280', '#92400e'].includes(c) ? '#facc15' : c, r: normRects(lineBoxes(T.chars, a, b), T) };
   addItem(Number(el.dataset.i), item);
   addNode(el, item);
 }

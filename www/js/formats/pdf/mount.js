@@ -6,9 +6,12 @@ import { attachPinch } from './pinch.js';
 import { attachDoubleTap } from './double-tap.js';
 import { getPageText } from './page-chars.js';
 import { renderThumb } from './thumb.js';
+import { renderForOcr } from './ocr-source.js';
+import { ocrText } from '../../core/ocr-geom.js';
 export async function mountPdf({ container, scroller, blob, startPage = 1, mode = 'scroll', onPage }) {
   const doc = await openPdf(blob);
   let cur = startPage, curMode = mode;
+  const ocr = new Map(); // page index -> recognized words (see core/ocr-geom.js)
   const list = await createPageList({ doc, container, scroller, mode, onPage: (n) => { cur = n; onPage(n, doc.numPages); } });
   const zoom = createZoom({
     scroller, content: container, lay: list.lay, entries: list.entries, getMode: () => curMode,
@@ -37,7 +40,14 @@ export async function mountPdf({ container, scroller, blob, startPage = 1, mode 
     doc,
     zoomBy: zoom.by,
     goTo: list.goTo,
-    getText: (i) => doc.getPage(i + 1).then(getPageText),
+    // Native text first; a page without text uses its recognized layer.
+    getText: async (i) => {
+      const T = await doc.getPage(i + 1).then(getPageText);
+      return T.chars.length || !ocr.has(i) ? T : ocrText(ocr.get(i));
+    },
+    hasText: async (i) => ocr.has(i) || (await doc.getPage(i + 1).then(getPageText)).chars.length > 0,
+    setOcr: (i, data) => ocr.set(i, data),
+    renderForOcr: (i) => renderForOcr(doc, i + 1),
     thumb: (n, canvas, w, near) => renderThumb(list, doc, n, canvas, w, near),
     setMode(m) {
       const keep = cur;
