@@ -44,6 +44,7 @@ export function closeViewer() {
   popBack?.();
   popBack = null;
   root.hidden = true;
+  root.classList.remove('no-thumbs', 'no-draw', 'no-mode');
   pages.replaceChildren();
   setStatus(null);
 }
@@ -63,9 +64,13 @@ export async function openViewer(meta, blob) {
     setHandle(h);
     setActiveHandle(h);
     setActiveDoc(meta);
-    loadAllOcr(meta.id).then((list) => list.forEach(([i, d]) => h.setOcr(i, d))).catch(() => {});
+    const caps = { thumbs: true, draw: true, mode: true, ...h.caps };
+    root.classList.toggle('no-thumbs', !caps.thumbs);
+    root.classList.toggle('no-draw', !caps.draw);
+    root.classList.toggle('no-mode', !caps.mode);
+    if (h.setOcr) loadAllOcr(meta.id).then((list) => list.forEach(([i, d]) => h.setOcr(i, d))).catch(() => {});
     initThumbs(h.doc, h, meta.lastPage ?? 1);
-    restorePanel();
+    if (caps.draw) restorePanel();
     startAwake();
     setStatus(null);
   } catch (err) {

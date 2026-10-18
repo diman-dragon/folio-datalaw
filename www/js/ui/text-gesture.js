@@ -99,7 +99,7 @@ function end(e) {
 }
 pages.addEventListener('pointerup', end);
 pages.addEventListener('pointercancel', end);
-pages.addEventListener('contextmenu', (e) => e.preventDefault());
+pages.addEventListener('contextmenu', (e) => { if (!e.target.closest('.fb2')) e.preventDefault(); }); // FB2 text uses the native selection
 pages.addEventListener('pagehide', (e) => { if (getSel()?.el === e.target) clearSel(); });
 scroller.addEventListener('scroll', () => { cancelPress(); if (getSel() && !drag) requestAnimationFrame(placeMenu); }, { passive: true });
 on('toolchange', () => { cancelPress(); drag = null; clearSel(); });

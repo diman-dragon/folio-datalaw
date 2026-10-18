@@ -2,10 +2,11 @@
 import { tx, wait, finish } from './db.js';
 import { fingerprint } from './fingerprint.js';
 import { dropOcrIn } from './ocr-store.js';
+import { isOpenable } from '../formats/registry.js';
 export async function listDocs() {
   const t = await tx('meta');
   const all = await wait(t.objectStore('meta').getAll());
-  return all.sort((a, b) => (b.openedAt - a.openedAt) || a.name.localeCompare(b.name));
+  return all.filter((d) => isOpenable(d.name)).sort((a, b) => (b.openedAt - a.openedAt) || a.name.localeCompare(b.name));
 }
 export async function getMeta(id) {
   const t = await tx('meta');

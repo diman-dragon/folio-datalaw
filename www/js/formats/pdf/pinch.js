@@ -8,6 +8,7 @@ export function attachPinch({ scroller, zoom, onSwipe, onStart = () => {} }) {
     if (e.touches.length !== 2 || g || [...e.touches].some((t) => t.touchType === 'stylus')) return; // pen + palm is not a pinch
     d0 = dist(e.touches);
     g = zoom.begin(...mid(e.touches));
+    scroller.addEventListener('touchmove', move, { passive: false }); // only while two fingers are down
     hold(true); // no rendering while the fingers move
     onStart();
   };
@@ -21,6 +22,7 @@ export function attachPinch({ scroller, zoom, onSwipe, onStart = () => {} }) {
     if (!g || e.touches.length >= 2) return;
     const done = g;
     g = null;
+    scroller.removeEventListener('touchmove', move);
     cancelAnimationFrame(raf);
     raf = 0;
     if (last) zoom.live(done, ...last);
@@ -30,7 +32,6 @@ export function attachPinch({ scroller, zoom, onSwipe, onStart = () => {} }) {
     if (Math.abs(done.k - 1) < 0.06) onSwipe({ dx: done.x - done.x0, dy: done.y - done.y0, dt: Date.now() - done.t0 });
   };
   scroller.addEventListener('touchstart', start, { passive: true });
-  scroller.addEventListener('touchmove', move, { passive: false });
   scroller.addEventListener('touchend', end, { passive: true });
   scroller.addEventListener('touchcancel', end, { passive: true });
   return () => {

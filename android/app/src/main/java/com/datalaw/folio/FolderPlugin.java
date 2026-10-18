@@ -139,9 +139,12 @@ public class FolderPlugin extends Plugin {
                     if (depth < MAX_DEPTH) walk(cr, tree, id, exts, out, depth + 1);
                     continue;
                 }
-                int dot = name.lastIndexOf('.');
-                String ext = dot >= 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
-                if (!exts.isEmpty() && !exts.contains(ext)) continue;
+                String lower = name.toLowerCase(Locale.ROOT);
+                boolean wanted = exts.isEmpty();
+                for (String e : exts) {
+                    if (lower.endsWith("." + e)) { wanted = true; break; } // also compound extensions such as fb2.zip
+                }
+                if (!wanted) continue;
                 JSObject f = new JSObject();
                 f.put("uri", DocumentsContract.buildDocumentUriUsingTree(tree, id).toString());
                 f.put("name", name);

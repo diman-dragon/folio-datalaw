@@ -2,6 +2,7 @@
 import { getFolder } from '../core/folder-pref.js';
 import { folderSupported, listFolder } from '../io/folder.js';
 import { mirrorFolder } from '../data/folder-docs.js';
+import { isOpenable } from '../formats/registry.js';
 import { emit } from '../core/bus.js';
 let running = null, last = 0;
 export function syncFolder({ force = false } = {}) {
@@ -13,7 +14,7 @@ export function syncFolder({ force = false } = {}) {
     try {
       if (!f) await mirrorFolder([]);
       else if (!folderSupported()) return false;
-      else await mirrorFolder(await listFolder(f.uri));
+      else await mirrorFolder((await listFolder(f.uri)).filter((x) => isOpenable(x.name)));
       last = Date.now();
       emit('libchange');
       return true;

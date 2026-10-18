@@ -1,4 +1,5 @@
 // One library card (cover + name + info); the same markup serves the grid and the list layout.
+import { titleOf } from '../formats/registry.js';
 import { icon } from './icon.js';
 import { t } from '../core/i18n.js';
 import { fmtSize } from '../core/format.js';
@@ -16,7 +17,7 @@ export function docCard(d) {
     + (d.src === 'folder' ? '' : `<button class="icon-btn doc-del">${icon('trash')}</button>`);
   li.querySelector('.cover-ph b').textContent = ext(d.name);
   li.querySelector('.prog').style.width = pct + '%';
-  li.querySelector('.doc-name').textContent = d.name.replace(/\.[^.]+$/, '');
+  li.querySelector('.doc-name').textContent = titleOf(d.name);
   li.querySelector('.doc-meta').textContent = [fmtSize(d.size), d.pages ? `${d.lastPage ?? 1}/${d.pages}` : ''].filter(Boolean).join(' · ');
   li.querySelector('.doc-del')?.setAttribute('aria-label', t('home.delete'));
   return li;

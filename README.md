@@ -55,3 +55,7 @@ formats/pdf/            pdfjs, open-doc, render-page, page-list, page-tracker, z
 
 - OCR работает офлайн: `npm install` (скрипт `postinstall`) скачивает tesseract.js 5, ядро и данные языков (rus, eng, ita, srp, srp_latn) в `www/vendor/tesseract` (папка в `.gitignore`). Для повторной загрузки: `npm run fetch-ocr`. Нужен интернет и утилита `tar`; без них приложение собирается и работает, но кнопка распознавания сообщает, что модуль не установлен. Размер APK растёт примерно на 40-60 МБ.
 - Кнопка «Картинки в PDF» (библиотека) собирает PDF без внешних библиотек (`data/pdf-writer.js`).
+
+## Форматы
+
+PDF и FB2 (`.fb2`, `.fb2.zip`, `.fbz`). Новый формат подключается модулем в `www/js/formats/<имя>/` и одной строкой в `formats/index.js`; библиотека, папка и «Открыть с помощью» используют реестр форматов.

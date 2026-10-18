@@ -56,6 +56,6 @@ on('pagechange', (p) => { page = p.n; total = p.total; });
 const penBtn = document.getElementById('tp-stylus');
 const paintPen = () => { penBtn.classList.toggle('on', stylusOnly()); penBtn.setAttribute('aria-pressed', stylusOnly()); };
 penBtn.addEventListener('click', () => { setStylusOnly(!stylusOnly()); toast(t(stylusOnly() ? 'edit.stylusOn' : 'edit.stylusOff')); });
-on('stylus', paintPen);
+on('stylus', () => { paintPen(); if (stylusOnly() && !tool) pick('pen'); });
 paintPin();
 paintPen();
