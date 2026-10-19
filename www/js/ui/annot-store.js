@@ -26,3 +26,5 @@ function step(op, undoing) {
 export function undoOp() { const op = done.pop(); if (!op) return []; const p = step(op, true); undone.push(op); changed(); return p; }
 export function redoOp() { const op = undone.pop(); if (!op) return []; const p = step(op, false); done.push(op); changed(); return p; }
 export function clearAnnots() { pages.clear(); done = []; undone = []; changed(); }
+export const exportAnnots = () => [...pages].filter(([, l]) => l.length).map(([i, l]) => [i, l]);
+export function importAnnots(data) { pages.clear(); data.forEach(([i, l]) => pages.set(i, l)); done = []; undone = []; changed(); }

@@ -13,7 +13,7 @@ const editBtn = document.getElementById('edit-btn');
 const tools = [...panel.querySelectorAll('[data-tool]')];
 const dots = panel.querySelectorAll('.color-dot[data-color]');
 const custom = document.getElementById('tp-custom');
-let pinned = getPref('panelpinned', false), tool = null, page = 1, total = 1;
+let pinned = getPref('panelpinned', false), tool = null, page = 1, total = 1, touched = false;
 const place = initPanelDrag(panel, () => pinned);
 function pick(next) {
   tool = next;
@@ -28,10 +28,11 @@ export function showPanel(open, { save = true } = {}) {
   if (open) place(); else if (tool) pick(null);
   emit('editbar', open);
 }
-export const restorePanel = () => showPanel(getPref('panelopen', false), { save: false });
-export const suspendPanel = () => showPanel(false, { save: false });
-editBtn.addEventListener('click', () => showPanel(panel.hidden));
-document.getElementById('tp-hide').addEventListener('click', () => showPanel(false));
+// A panel the reader already opened or closed by hand is not overridden by the slower restore at document open.
+export const restorePanel = () => { if (!touched) showPanel(getPref('panelopen', false), { save: false }); };
+export const suspendPanel = () => { touched = false; showPanel(false, { save: false }); };
+editBtn.addEventListener('click', () => { touched = true; showPanel(panel.hidden); });
+document.getElementById('tp-hide').addEventListener('click', () => { touched = true; showPanel(false); });
 const pinBtn = document.getElementById('tp-pin');
 const paintPin = () => { pinBtn.classList.toggle('on', pinned); panel.classList.toggle('pinned', pinned); };
 pinBtn.addEventListener('click', () => { pinned = !pinned; setPref('panelpinned', pinned); paintPin(); });

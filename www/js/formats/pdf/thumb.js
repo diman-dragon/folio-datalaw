@@ -1,6 +1,6 @@
 // Page thumbnail: scaled copy of the page's base canvas when it is on screen, otherwise a low-priority queued render.
 import { renderPage } from './render-page.js';
-import { enqueue } from './render-queue.js';
+import { enqueue } from '../shared/render-queue.js';
 export function renderThumb({ entries }, doc, n, canvas, cssWidth, near) {
   const e = entries[n - 1];
   canvas.width = Math.round(cssWidth * Math.min(window.devicePixelRatio || 1, 2));

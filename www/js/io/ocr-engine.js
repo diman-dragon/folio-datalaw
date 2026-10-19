@@ -19,11 +19,14 @@ function corePath(meta) {
 }
 // Starts the worker; if the first way fails (workers from a plain URL, then from a blob) the next one is tried.
 async function start(meta, langs) {
-  const { createWorker } = await import(`${base}tesseract.esm.min.js`);
+  const mod = await import(`${base}tesseract.esm.min.js`);
+  // The ESM build may export createWorker by name, on a default object, or only on a global; all three are accepted.
+  const T = mod.createWorker ? mod : (mod.default?.createWorker ? mod.default : globalThis.Tesseract);
+  if (typeof T?.createWorker !== 'function') throw new Error('createWorker export not found in tesseract.esm.min.js');
   const errors = [];
   for (const blob of [false, true]) {
     try {
-      return await createWorker(langs, 1, {
+      return await T.createWorker(langs, 1, {
         workerPath: `${base}worker.min.js`, corePath: corePath(meta), langPath: `${base}lang`, gzip: true, cacheMethod: 'none', workerBlobURL: blob,
         logger: (m) => { if (m.status === 'recognizing text') progress?.(m.progress); },
       });

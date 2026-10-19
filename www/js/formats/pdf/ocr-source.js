@@ -1,5 +1,5 @@
 // Renders a page into a canvas sized for text recognition (about 150 dpi of an A4 page); sizes are in page units.
-import { enqueue } from './render-queue.js';
+import { enqueue } from '../shared/render-queue.js';
 const TARGET_W = 1600;
 export function renderForOcr(doc, n) {
   return new Promise((resolve, reject) => enqueue(`o${n}`, 5, async (ctl) => {

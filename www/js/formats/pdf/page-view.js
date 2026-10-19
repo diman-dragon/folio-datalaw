@@ -1,6 +1,6 @@
 // One page's canvases: a base canvas (whole page, size-capped) plus a detail canvas (visible window) while zoomed in.
 import { renderPage, baseCap, detailCap } from './render-page.js';
-import { enqueue, cancel } from './render-queue.js';
+import { enqueue, cancel } from '../shared/render-queue.js';
 const dpr = () => Math.min(window.devicePixelRatio || 1, 2);
 const canvas = (cls) => Object.assign(document.createElement('canvas'), { className: cls });
 const fire = (e, name) => e.el.dispatchEvent(new CustomEvent(name, { bubbles: true, detail: { i: e.i } }));

@@ -1,14 +1,15 @@
-// IndexedDB connection (stores "meta" = records, "blobs" = file bytes, "covers" = thumbnails, "ocr" = recognized text) and promise helpers.
+// IndexedDB connection (stores "meta" = records, "blobs" = file bytes, "covers" = thumbnails, "ocr" = recognized text, "annots" = marks and drawings) and promise helpers.
 let opening;
 export function db() {
   opening ??= new Promise((res, rej) => {
-    const r = indexedDB.open('folio', 3);
+    const r = indexedDB.open('folio', 4);
     r.onupgradeneeded = () => {
       const d = r.result;
       if (!d.objectStoreNames.contains('meta')) d.createObjectStore('meta', { keyPath: 'id' });
       if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs');
       if (!d.objectStoreNames.contains('covers')) d.createObjectStore('covers');
       if (!d.objectStoreNames.contains('ocr')) d.createObjectStore('ocr');
+      if (!d.objectStoreNames.contains('annots')) d.createObjectStore('annots');
     };
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);

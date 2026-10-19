@@ -58,7 +58,6 @@ export function createRenderer(book) {
     root.append(head);
     if (book.annotation) root.append(kids(el('div', 'annotation'), book.annotation, 1));
     book.bodies.forEach((b) => root.append(body(b)));
-    root.querySelectorAll('[id]').forEach(() => {});
     return root;
   }
   return { render, dispose: () => urls.forEach((u) => URL.revokeObjectURL(u)) };

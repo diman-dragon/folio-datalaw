@@ -2,6 +2,7 @@
 import { tx, wait, finish } from './db.js';
 import { fingerprint } from './fingerprint.js';
 import { dropOcrIn } from './ocr-store.js';
+import { dropAnnotsIn } from './annot-db.js';
 import { isOpenable } from '../formats/registry.js';
 export async function listDocs() {
   const t = await tx('meta');
@@ -39,8 +40,9 @@ export async function updateDoc(id, patch) {
   return meta;
 }
 export async function removeDoc(id) {
-  const t = await tx(['meta', 'blobs', 'covers', 'ocr'], 'readwrite');
+  const t = await tx(['meta', 'blobs', 'covers', 'ocr', 'annots'], 'readwrite');
   dropOcrIn(t, id);
+  dropAnnotsIn(t, id);
   t.objectStore('meta').delete(id);
   t.objectStore('blobs').delete(id);
   t.objectStore('covers').delete(id);
