@@ -85,4 +85,9 @@ export const ru = {
   'color.white': 'Белый',
   'color.custom': 'Свой цвет',
   'edit.stylusHint': 'Кнопка-перо в палитре: рисует только стилус, листают пальцы',
+  'ocr.stepRender': 'подготовка страницы',
+  'ocr.stepCore': 'загрузка движка',
+  'ocr.stepInit': 'запуск',
+  'ocr.stepLang': 'загрузка языка',
+  'ocr.stepText': 'распознавание',
 };

@@ -1,5 +1,5 @@
 // Loads a FictionBook: bytes (plain or zipped) -> text in the declared encoding -> XML document + book info.
-import { firstEntry } from './zip.js';
+import { firstEntry } from '../shared/zip.js';
 const NS_XLINK = 'http://www.w3.org/1999/xlink';
 function decode(bytes) {
   if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder('utf-16le').decode(bytes);

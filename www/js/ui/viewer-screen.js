@@ -8,6 +8,7 @@ import { startAwake, stopAwake } from '../core/awake.js';
 import { emit } from '../core/bus.js';
 import { setActiveHandle, setActiveDoc } from './viewer-handle.js';
 import { loadAllOcr } from '../data/ocr-store.js';
+import { on } from '../core/bus.js';
 import { flushProgress, saveProgress, resetProgress } from './viewer-progress.js';
 import { startPersist, stopPersist } from './annot-persist.js';
 import { clearAnnots } from './annot-store.js';
@@ -20,6 +21,8 @@ const scroller = document.getElementById('viewer-scroll');
 const status = document.getElementById('viewer-status');
 let handle = null, popBack = null, session = 0;
 const setStatus = (text) => { status.hidden = !text; status.textContent = text ?? ''; };
+// Another pagination of a reflowable book: the thumbnail list has to follow the new page count.
+on('layoutchange', () => { if (handle?.doc) initThumbs(handle.doc, handle, 1); });
 export function closeViewer() {
   session++;
   stopAwake();
@@ -54,7 +57,8 @@ export async function openViewer(meta, blob) {
     const mod = find(meta.name, blob.type);
     let real = false;
     const onPage = (n, total, frac) => { showPage(n, total); saveProgress(meta, n, total, frac ?? 0, real); updateThumbsActive(n); emit('pagechange', { n, total }); };
-    const h = await mod.mount({ container: pages, scroller, blob, startPage: meta.lastPage ?? 1, startFrac: meta.lastFrac, mode: getReadMode(), onPage });
+    const wait = new Promise((_, rej) => setTimeout(() => rej(new Error('open timeout')), 120000));
+    const h = await Promise.race([wait, mod.mount({ container: pages, scroller, blob, startPage: meta.lastPage ?? 1, startFrac: meta.lastFrac, name: meta.name, mode: getReadMode(), onPage })]);
     real = Boolean(h.layoutSig); // FB2: the page count depends on screen and font, so it is stored after opening
     if (mine !== session) { h.destroy(); return; }
     handle = h;
@@ -67,6 +71,7 @@ export async function openViewer(meta, blob) {
     root.classList.toggle('no-mode', !caps.mode);
     root.classList.toggle('no-ocr', caps.ocr === false);
     if (h.setOcr) loadAllOcr(meta.id).then((list) => list.forEach(([i, d]) => h.setOcr(i, d))).catch(() => {});
+    handle = h;
     initThumbs(h.doc, h, meta.lastPage ?? 1);
     if (caps.draw) restorePanel();
     startPersist(meta.id, h);

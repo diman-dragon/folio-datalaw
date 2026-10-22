@@ -19,7 +19,7 @@ export function createRenderer(book) {
     if (n.nodeType === 3) return document.createTextNode(n.nodeValue);
     if (n.nodeType !== 1) return null;
     const name = n.localName;
-    if (name === 'image') { const src = imageUrl(hrefOf(n)); if (!src) return null; const i = el('img', 'pic'); i.src = src; i.loading = 'lazy'; i.alt = n.getAttribute('alt') ?? ''; return i; }
+    if (name === 'image') { const src = imageUrl(hrefOf(n)); if (!src) return null; const i = el('img', 'pic'); i.src = src; i.alt = n.getAttribute('alt') ?? ''; return i; }
     if (name === 'empty-line') return el('div', 'gap');
     if (name === 'title') return heading(n, depth);
     if (name === 'section') return section(n, depth + 1);

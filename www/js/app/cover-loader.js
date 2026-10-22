@@ -15,7 +15,7 @@ async function make(meta) {
     const src = await loadBlob(meta);
     const mod = src && find(meta.name, src.type);
     if (!mod?.cover) return null;
-    const res = await mod.cover(src, { width: 320 });
+    const res = await mod.cover(src, { width: 320, name: meta.name });
     blob = res.blob;
     meta.pages = res.pages;
     await putCover(meta.id, blob);

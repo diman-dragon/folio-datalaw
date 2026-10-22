@@ -1,11 +1,11 @@
 // One FB2 page as DOM: the blocks (or the pieces of split blocks) of a page inside a fixed-size "paper" box.
 import { textMap, rangeOf } from './text-pos.js';
-export function makePage(blocks, segs, geo) {
+export function makePage(blocks, segs, geo, resolve) {
   const page = document.createElement('div');
   page.className = 'fb2p';
   page.style.cssText = `width:${geo.pw}px;height:${geo.ph}px;padding:${geo.py}px ${geo.px}px;font-size:${geo.fs}px`;
-  for (const s of segs) {
-    const b = blocks[s.b];
+  for (const seg of segs) {
+    const s = resolve(seg), b = blocks[s.b];
     if (s.s === undefined) { page.append(b.cloneNode(true)); continue; }
     const piece = b.cloneNode(false);
     piece.append(rangeOf(textMap(b), s.s, s.e).cloneContents());

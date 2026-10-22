@@ -58,4 +58,4 @@ formats/pdf/            pdfjs, open-doc, render-page, page-list, page-tracker, z
 
 ## Форматы
 
-PDF и FB2 (`.fb2`, `.fb2.zip`, `.fbz`). Новый формат подключается модулем в `www/js/formats/<имя>/` и одной строкой в `formats/index.js`; библиотека, папка и «Открыть с помощью» используют реестр форматов. Постраничные форматы строятся на общем движке `formats/shared/` (источник страниц: `count`, `ratio`, `views(lay)`); так сделаны PDF (canvas) и FB2 (DOM-страницы).
+PDF; книги FB2 (`.fb2`, `.fb2.zip`, `.fbz`), EPUB, DOCX, TXT, Markdown, HTML; картинки и комиксы (JPG/PNG/WebP/GIF/BMP, CBZ). Новый формат подключается модулем в `www/js/formats/<имя>/` и одной строкой в `formats/index.js`; библиотека, папка и «Открыть с помощью» используют реестр форматов. Постраничные форматы строятся на общем движке `formats/shared/` (источник страниц: `count`, `ratio`, `views(lay)`); так сделаны PDF (canvas), текстовые форматы (`formats/reflow/`, DOM-страницы: достаточно написать загрузчик `load(blob) -> { blocks, ids, title, author, image }`) и картинки (`formats/pics/`).

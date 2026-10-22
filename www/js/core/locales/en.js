@@ -85,4 +85,9 @@ export const en = {
   'color.white': 'White',
   'color.custom': 'Custom colour',
   'edit.stylusHint': 'Pen button in the palette: only the stylus draws, fingers scroll',
+  'ocr.stepRender': 'preparing the page',
+  'ocr.stepCore': 'loading the engine',
+  'ocr.stepInit': 'starting',
+  'ocr.stepLang': 'loading the language',
+  'ocr.stepText': 'recognizing',
 };

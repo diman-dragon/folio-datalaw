@@ -8,7 +8,9 @@ export function find(name = '', type = '') {
 }
 // The library only ever shows files that can be opened.
 export const isOpenable = (name, type) => !!find(name, type);
-export const acceptExts = () => mods.flatMap((m) => m.extensions);
+// Extensions the folder scan looks for (single pictures are left out on purpose: see `scan: false`).
+export const acceptExts = () => mods.filter((m) => m.scan !== false).flatMap((m) => m.extensions);
+export const isScannable = (name = '') => { const m = find(name); return !!m && m.scan !== false; };
 export const acceptList = () => [...new Set(mods.flatMap((m) => [...m.extensions.map((e) => `.${e.split('.').pop()}`), ...m.mimes]))].join(',');
 // Book title from a file name: the (possibly compound) extension is cut off, e.g. "war.fb2.zip" -> "war".
 export function titleOf(name) {

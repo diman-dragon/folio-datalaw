@@ -27,6 +27,8 @@ export async function toggleOcr(force) {
   sheet.hidden = !(force ?? sheet.hidden);
   if (!sheet.hidden) { await paintChips(); if (!(await ocrInfo())) toast(t('ocr.missing')); }
 }
+const STEPS = { render: 'ocr.stepRender', 'loading tesseract core': 'ocr.stepCore', 'initializing tesseract': 'ocr.stepInit', 'loading language traineddata': 'ocr.stepLang', 'initializing api': 'ocr.stepInit', 'recognizing text': 'ocr.stepText' };
+const stepName = (s) => (STEPS[s] ? t(STEPS[s]) : s ?? '');
 const errBox = $('ocr-error');
 function showError(msg) { errBox.textContent = msg; errBox.hidden = false; }
 async function start(pages) {
@@ -37,7 +39,7 @@ async function start(pages) {
   try {
     const done = await recognizePages(h, doc.id, pages, langs, {
       cancelled: () => stop,
-      onPage: (i, n, p) => { fill.style.width = `${((i - 1 + p) / n) * 100}%`; status.textContent = t('ocr.progress').replace('{i}', i).replace('{n}', n).replace('{p}', Math.round(p * 100)); },
+      onPage: (i, n, p, step) => { fill.style.width = `${((i - 1 + p) / n) * 100}%`; status.textContent = `${t('ocr.progress').replace('{i}', i).replace('{n}', n).replace('{p}', Math.round(p * 100))} · ${stepName(step)}`; },
     });
     if (!stop) { toast(t(done ? 'ocr.done' : 'ocr.nothing')); sheet.hidden = true; }
   } catch (err) {

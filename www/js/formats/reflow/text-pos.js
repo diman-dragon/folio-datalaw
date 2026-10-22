@@ -1,4 +1,5 @@
 // Character offsets inside a block (text nodes in order) and ranges over them; used to split a block between pages.
+const rg = document.createRange(); // one shared range: probing a position must be cheap
 export function textMap(block) {
   const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
   const nodes = [];
@@ -19,8 +20,10 @@ export function rangeOf(map, s, e) {
 // Left edge of the first visible rect of the char at off (skips collapsed white space).
 export function leftAt(map, off) {
   for (let o = off; o < Math.min(map.total, off + 8); o++) {
-    const r = rangeOf(map, o, o + 1).getClientRects()[0];
-    if (r && (r.width || r.height)) return r.left;
+    rg.setStart(...point(map, o));
+    rg.setEnd(...point(map, o + 1));
+    const r = rg.getBoundingClientRect();
+    if (r.width || r.height) return r.left;
   }
   return null;
 }
